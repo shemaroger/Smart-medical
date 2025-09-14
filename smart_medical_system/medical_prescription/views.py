@@ -1,0 +1,770 @@
+# views.py
+from rest_framework import status, generics, permissions
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.db import transaction
+from django.db.models import Q, Avg, Sum
+from decimal import Decimal
+import uuid
+import logging
+from datetime import timedelta
+from django.utils import timezone
+
+from .models import *
+from rest_framework.exceptions import ValidationError
+from .serializers import *
+
+logger = logging.getLogger(__name__)
+
+# Email notification helper
+def send_email_notification(recipient_email, subject, message, notification_type='general'):
+    """
+    Send email notification and create notification record
+    """
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+        )
+        
+        # Create notification record if user exists
+        try:
+            user = User.objects.get(email=recipient_email)
+            Notification.objects.create(
+                recipient=user,
+                title=subject,
+                message=message,
+                notification_type=notification_type,
+                email_sent=True
+            )
+        except User.DoesNotExist:
+            pass
+            
+        logger.info(f"Email sent successfully to {recipient_email}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
+        return False
+
+# Authentication Views
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_user(request):
+    """Register new user and create profile based on user type"""
+    serializer = UserRegistrationSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            with transaction.atomic():
+                user = serializer.save()
+                token, created = Token.objects.get_or_create(user=user)
+                
+                # Send welcome email
+                subject = "Welcome to Smart Medical Prescription System"
+                message = f"Hello {user.first_name},\n\nWelcome to our Smart Medical Prescription System. Your account has been created successfully.\n\nBest regards,\nMedical System Team"
+                send_email_notification(user.email, subject, message, 'general')
+                
+                return Response({
+                    'message': 'User registered successfully',
+                    'user': UserSerializer(user).data,
+                    'token': token.key
+                }, status=status.HTTP_201_CREATED)
+                
+        except Exception as e:
+            logger.error(f"Registration error: {str(e)}")
+            return Response({
+                'error': 'Registration failed'
+            }, status=status.HTTP_400_BAD_REQUEST)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_user(request):
+    """User login"""
+    serializer = UserLoginSerializer(data=request.data)
+    try:
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'message': 'Login successful',
+                'user': UserSerializer(user).data,
+                'token': token.key
+            }, status=status.HTTP_200_OK)
+        else:
+            # If the serializer is not valid, return a generic error message
+            return Response(
+                {'error': 'Incorrect email or password'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    except ValidationError as e:
+        # Catch ValidationError and return a generic error message
+        return Response(
+            {'error': 'Incorrect email or password'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]  
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_doctor_profile(request):
+    """Create doctor profile for authenticated user"""
+    if request.user.user_type != 'doctor':
+        return Response({'error': 'Only doctor users can create doctor profiles'},
+                       status=status.HTTP_403_FORBIDDEN)
+
+
+    serializer = DoctorCreateSerializer(data=request.data)
+    print("Request data:", request.data)  # Print the incoming request data
+
+    if serializer.is_valid():
+        doctor = serializer.save(user=request.user)
+
+        # Send profile creation notification
+        subject = "Doctor Profile Created"
+        message = f"Dear Dr. {request.user.first_name},\n\nYour doctor profile has been created successfully and is pending verification.\n\nProfile Details:\n- License Number: {doctor.license_number}\n- Specialization: {doctor.specialization}\n- Hospital: {doctor.hospital}\n\nBest regards,\nMedical System Team"
+        send_email_notification(request.user.email, subject, message, 'general')
+        
+        return Response({
+            'message': 'Doctor profile created successfully',
+            'doctor': DoctorSerializer(doctor).data
+        }, status=status.HTTP_201_CREATED)
+
+    print("Serializer errors:", serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_patient_profile(request):
+    """Create patient profile for authenticated user"""
+    if request.user.user_type != 'patient':
+        return Response({'error': 'Only patient users can create patient profiles'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    if hasattr(request.user, 'patient'):
+        return Response({'error': 'Patient profile already exists'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = PatientCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        patient = serializer.save(user=request.user)
+        
+        # Send profile creation notification
+        subject = "Patient Profile Created"
+        message = f"Dear {request.user.first_name},\n\nYour patient profile has been created successfully.\n\nYou can now:\n- Book appointments\n- View prescriptions\n- Find recommended pharmacies\n\nBest regards,\nMedical System Team"
+        send_email_notification(request.user.email, subject, message, 'general')
+        
+        return Response({
+            'message': 'Patient profile created successfully',
+            'patient': PatientSerializer(patient).data
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_pharmacy_profile(request):
+    """Create pharmacy profile for authenticated user"""
+    if request.user.user_type != 'pharmacy':
+        return Response({'error': 'Only pharmacy users can create pharmacy profiles'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    if hasattr(request.user, 'pharmacy'):
+        return Response({'error': 'Pharmacy profile already exists'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
+    serializer = PharmacyCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        pharmacy = serializer.save(user=request.user)
+        
+        # Send profile creation notification
+        subject = "Pharmacy Profile Created"
+        message = f"Dear {request.user.first_name},\n\nYour pharmacy profile for '{pharmacy.pharmacy_name}' has been created successfully and is pending verification.\n\nProfile Details:\n- License Number: {pharmacy.license_number}\n- Address: {pharmacy.address}\n- Location: {pharmacy.location}\n\nBest regards,\nMedical System Team"
+        send_email_notification(request.user.email, subject, message, 'general')
+        
+        return Response({
+            'message': 'Pharmacy profile created successfully',
+            'pharmacy': PharmacySerializer(pharmacy).data
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# Hospital Views
+class HospitalListCreateView(generics.ListCreateAPIView):
+    queryset = Hospital.objects.filter(is_active=True)
+    serializer_class = HospitalSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        hospital = serializer.save()
+        
+        # Send hospital creation notification to admin
+        subject = "New Hospital Registered"
+        message = f"A new hospital has been registered:\n\nName: {hospital.name}\nAddress: {hospital.address}\nPhone: {hospital.phone}\nEmail: {hospital.email}\n\nPlease review and verify."
+        # Send to admin users
+        admin_users = User.objects.filter(user_type='admin')
+        for admin in admin_users:
+            send_email_notification(admin.email, subject, message, 'general')
+
+class HospitalDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Hospital.objects.all()
+    serializer_class = HospitalSerializer
+    permission_classes = [IsAuthenticated]
+
+# Drug Views
+class DrugListCreateView(generics.ListCreateAPIView):
+    queryset = Drug.objects.all()
+    serializer_class = DrugSerializer
+    permission_classes = [IsAuthenticated]
+
+class DrugDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Drug.objects.all()
+    serializer_class = DrugSerializer
+    permission_classes = [IsAuthenticated]
+
+# Pharmacy Inventory Views
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
+def pharmacy_inventory(request):
+    """Manage pharmacy inventory - only for pharmacy users"""
+    if not hasattr(request.user, 'pharmacy'):
+        return Response({'error': 'Only pharmacy users can access inventory'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    pharmacy = request.user.pharmacy
+    
+    if request.method == 'GET':
+        inventory = PharmacyInventory.objects.filter(pharmacy=pharmacy)
+        serializer = PharmacyInventorySerializer(inventory, many=True)
+        return Response(serializer.data)
+    
+    elif request.method == 'POST':
+        serializer = PharmacyInventoryCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            inventory_item = serializer.save(pharmacy=pharmacy)
+            
+            # Check for low stock and send notification
+            if inventory_item.is_low_stock:
+                subject = "Low Stock Alert"
+                message = f"Warning: {inventory_item.drug.name} is running low in stock.\n\nCurrent quantity: {inventory_item.quantity_available}\nThreshold: {inventory_item.low_stock_threshold}\n\nPlease restock soon."
+                send_email_notification(request.user.email, subject, message, 'low_stock_alert')
+            
+            return Response({
+                'message': 'Inventory item added successfully',
+                'item': PharmacyInventorySerializer(inventory_item).data
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def pharmacy_inventory_detail(request, item_id):
+    """Update or delete specific inventory item"""
+    if not hasattr(request.user, 'pharmacy'):
+        return Response({'error': 'Only pharmacy users can access inventory'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        inventory_item = PharmacyInventory.objects.get(
+            id=item_id, 
+            pharmacy=request.user.pharmacy
+        )
+    except PharmacyInventory.DoesNotExist:
+        return Response({'error': 'Inventory item not found'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    if request.method == 'PUT':
+        serializer = PharmacyInventoryCreateSerializer(inventory_item, data=request.data, partial=True)
+        if serializer.is_valid():
+            inventory_item = serializer.save()
+            
+            # Check for low stock after update
+            if inventory_item.is_low_stock:
+                subject = "Low Stock Alert - Updated"
+                message = f"After recent update, {inventory_item.drug.name} is still low in stock.\n\nCurrent quantity: {inventory_item.quantity_available}\nThreshold: {inventory_item.low_stock_threshold}\n\nPlease restock soon."
+                send_email_notification(request.user.email, subject, message, 'low_stock_alert')
+            
+            return Response({
+                'message': 'Inventory item updated successfully',
+                'item': PharmacyInventorySerializer(inventory_item).data
+            })
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == 'DELETE':
+        drug_name = inventory_item.drug.name
+        inventory_item.delete()
+        
+        subject = "Inventory Item Removed"
+        message = f"The inventory item '{drug_name}' has been removed from your pharmacy inventory."
+        send_email_notification(request.user.email, subject, message, 'general')
+        
+        return Response({'message': 'Inventory item deleted successfully'})
+
+# Appointment Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_appointment(request):
+    """Create appointment - only for patients"""
+    if not hasattr(request.user, 'patient'):
+        return Response({'error': 'Only patients can create appointments'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = AppointmentCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        appointment = serializer.save(patient=request.user.patient)
+        
+        # Send notifications to patient and doctor
+        patient_subject = "Appointment Request Submitted"
+        patient_message = f"Dear {request.user.first_name},\n\nYour appointment request has been submitted successfully.\n\nDetails:\n- Doctor: Dr. {appointment.doctor.user.first_name} {appointment.doctor.user.last_name}\n- Hospital: {appointment.hospital.name}\n- Requested Date: {appointment.appointment_date}\n- Reason: {appointment.reason}\n\nStatus: Pending approval\n\nYou will be notified once the doctor approves your request.\n\nBest regards,\nMedical System Team"
+        send_email_notification(request.user.email, patient_subject, patient_message, 'appointment_request')
+        
+        doctor_subject = "New Appointment Request"
+        doctor_message = f"Dear Dr. {appointment.doctor.user.first_name},\n\nYou have received a new appointment request.\n\nPatient: {appointment.patient.user.first_name} {appointment.patient.user.last_name}\nRequested Date: {appointment.appointment_date}\nReason: {appointment.reason}\n\nPlease review and approve/decline the request.\n\nBest regards,\nMedical System Team"
+        send_email_notification(appointment.doctor.user.email, doctor_subject, doctor_message, 'appointment_request')
+        
+        return Response({
+            'message': 'Appointment request created successfully',
+            'appointment': AppointmentSerializer(appointment).data
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_appointments(request):
+    """Get appointments based on user type"""
+    user = request.user
+    
+    if hasattr(user, 'patient'):
+        appointments = Appointment.objects.filter(patient=user.patient)
+    elif hasattr(user, 'doctor'):
+        appointments = Appointment.objects.filter(doctor=user.doctor)
+    else:
+        return Response({'error': 'No appointments found for this user type'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def update_appointment_status(request, appointment_id):
+    """Update appointment status - only for doctors"""
+    if not hasattr(request.user, 'doctor'):
+        return Response({'error': 'Only doctors can update appointment status'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        appointment = Appointment.objects.get(id=appointment_id, doctor=request.user.doctor)
+    except Appointment.DoesNotExist:
+        return Response({'error': 'Appointment not found'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+    
+    new_status = request.data.get('status')
+    notes = request.data.get('notes', '')
+    
+    if new_status not in ['approved', 'completed', 'cancelled']:
+        return Response({'error': 'Invalid status'}, 
+                       status=status.HTTP_400_BAD_REQUEST)
+    
+    appointment.status = new_status
+    appointment.notes = notes
+    appointment.save()
+    
+    # Send notification to patient
+    status_messages = {
+        'approved': 'Your appointment has been approved.',
+        'completed': 'Your appointment has been completed.',
+        'cancelled': 'Your appointment has been cancelled.'
+    }
+    
+    subject = f"Appointment {new_status.title()}"
+    message = f"Dear {appointment.patient.user.first_name},\n\n{status_messages[new_status]}\n\nAppointment Details:\n- Doctor: Dr. {appointment.doctor.user.first_name} {appointment.doctor.user.last_name}\n- Date: {appointment.appointment_date}\n- Reason: {appointment.reason}\n"
+    
+    if notes:
+        message += f"\nNotes from doctor: {notes}\n"
+    
+    message += "\nBest regards,\nMedical System Team"
+    
+    send_email_notification(appointment.patient.user.email, subject, message, f'appointment_{new_status}')
+    
+    return Response({
+        'message': f'Appointment {new_status} successfully',
+        'appointment': AppointmentSerializer(appointment).data
+    })
+
+# Prescription Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_prescription(request):
+    """Create prescription - only for doctors"""
+    if not hasattr(request.user, 'doctor'):
+        return Response({'error': 'Only doctors can create prescriptions'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = PrescriptionCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            with transaction.atomic():
+                prescription = serializer.save()
+                
+                # Update appointment status to completed
+                appointment = prescription.appointment
+                appointment.status = 'completed'
+                appointment.save()
+                
+                # Generate pharmacy recommendations
+                generate_pharmacy_recommendations(prescription)
+                
+                # Send notification to patient
+                subject = "Prescription Ready"
+                message = f"Dear {prescription.patient.user.first_name},\n\nYour prescription is ready.\n\nDiagnosis: {prescription.diagnosis}\n\nPrescribed Medications:\n"
+                
+                for item in prescription.items.all():
+                    message += f"- {item.drug.name}: {item.quantity} units, {item.dosage}, for {item.duration}\n"
+                
+                message += f"\nNotes: {prescription.notes}\n\nRecommended pharmacies will be sent separately.\n\nBest regards,\nMedical System Team"
+                
+                send_email_notification(prescription.patient.user.email, subject, message, 'prescription_ready')
+                
+                return Response({
+                    'message': 'Prescription created successfully',
+                    'prescription': PrescriptionSerializer(prescription).data
+                }, status=status.HTTP_201_CREATED)
+                
+        except Exception as e:
+            logger.error(f"Prescription creation error: {str(e)}")
+            return Response({'error': 'Failed to create prescription'}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def generate_pharmacy_recommendations(prescription):
+    """Generate pharmacy recommendations based on drug availability"""
+    try:
+        prescribed_drugs = prescription.items.all()
+        pharmacies = Pharmacy.objects.filter(is_verified=True)
+        
+        recommendations = []
+        
+        for pharmacy in pharmacies:
+            available_drugs = 0
+            total_cost = Decimal('0.00')
+            
+            for item in prescribed_drugs:
+                try:
+                    inventory = PharmacyInventory.objects.get(
+                        pharmacy=pharmacy,
+                        drug=item.drug,
+                        quantity_available__gte=item.quantity
+                    )
+                    available_drugs += 1
+                    total_cost += inventory.price_per_unit * item.quantity
+                except PharmacyInventory.DoesNotExist:
+                    continue
+            
+            if available_drugs > 0:
+                availability_score = (available_drugs / len(prescribed_drugs)) * 100
+                
+                recommendation = PharmacyRecommendation.objects.create(
+                    prescription=prescription,
+                    pharmacy=pharmacy,
+                    availability_score=availability_score,
+                    total_cost=total_cost
+                )
+                recommendations.append(recommendation)
+        
+        # Send recommendations to patient if any found
+        if recommendations:
+            # Sort by availability score and cost
+            recommendations.sort(key=lambda x: (-x.availability_score, x.total_cost))
+            
+            subject = "Pharmacy Recommendations"
+            message = f"Dear {prescription.patient.user.first_name},\n\nBased on your prescription, here are our recommended pharmacies:\n\n"
+            
+            for i, rec in enumerate(recommendations[:3], 1):  # Top 3 recommendations
+                message += f"{i}. {rec.pharmacy.pharmacy_name}\n"
+                message += f"   - Availability: {rec.availability_score:.1f}%\n"
+                message += f"   - Total Cost: ${rec.total_cost:.2f}\n"
+                message += f"   - Location: {rec.pharmacy.location}\n"
+                message += f"   - Address: {rec.pharmacy.address}\n\n"
+            
+            message += "Please contact the pharmacy to confirm availability before visiting.\n\nBest regards,\nMedical System Team"
+            
+            send_email_notification(prescription.patient.user.email, subject, message, 'pharmacy_recommendation')
+            
+    except Exception as e:
+        logger.error(f"Failed to generate pharmacy recommendations: {str(e)}")
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_prescriptions(request):
+    """Get prescriptions based on user type"""
+    user = request.user
+    
+    if hasattr(user, 'patient'):
+        prescriptions = Prescription.objects.filter(patient=user.patient)
+    elif hasattr(user, 'doctor'):
+        prescriptions = Prescription.objects.filter(doctor=user.doctor)
+    else:
+        return Response({'error': 'No prescriptions found for this user type'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = PrescriptionSerializer(prescriptions, many=True)
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_pharmacy_recommendations(request, prescription_id):
+    """Get pharmacy recommendations for a specific prescription"""
+    try:
+        prescription = Prescription.objects.get(id=prescription_id)
+        
+        # Check if user has permission to view this prescription
+        if hasattr(request.user, 'patient') and prescription.patient.user != request.user:
+            return Response({'error': 'Access denied'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+        elif hasattr(request.user, 'doctor') and prescription.doctor.user != request.user:
+            return Response({'error': 'Access denied'}, 
+                           status=status.HTTP_403_FORBIDDEN)
+        
+        recommendations = PharmacyRecommendation.objects.filter(
+            prescription=prescription
+        ).order_by('-availability_score', 'total_cost')
+        
+        serializer = PharmacyRecommendationSerializer(recommendations, many=True)
+        return Response(serializer.data)
+        
+    except Prescription.DoesNotExist:
+        return Response({'error': 'Prescription not found'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+
+# Payment Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_payment(request):
+    """Create payment - only for patients"""
+    if not hasattr(request.user, 'patient'):
+        return Response({'error': 'Only patients can make payments'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = PaymentCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        try:
+            with transaction.atomic():
+                prescription_id = serializer.validated_data['prescription_id']
+                pharmacy_id = serializer.validated_data['pharmacy_id']
+                
+                prescription = Prescription.objects.get(id=prescription_id)
+                pharmacy = Pharmacy.objects.get(user_id=pharmacy_id)
+                
+                # Generate unique transaction ID
+                transaction_id = str(uuid.uuid4())[:8].upper()
+                
+                payment = Payment.objects.create(
+                    prescription=prescription,
+                    pharmacy=pharmacy,
+                    patient=request.user.patient,
+                    amount=serializer.validated_data['amount'],
+                    payment_method=serializer.validated_data['payment_method'],
+                    transaction_id=transaction_id,
+                    status='completed'  # Assuming immediate completion for demo
+                )
+                
+                # Update prescription status
+                prescription.status = 'filled'
+                prescription.save()
+                
+                # Send confirmation emails
+                patient_subject = "Payment Confirmation"
+                patient_message = f"Dear {request.user.first_name},\n\nYour payment has been processed successfully.\n\nTransaction ID: {transaction_id}\nAmount: ${payment.amount}\nPharmacy: {pharmacy.pharmacy_name}\nPayment Method: {payment.payment_method.title()}\n\nYour prescription is now ready for collection.\n\nBest regards,\nMedical System Team"
+                send_email_notification(request.user.email, patient_subject, patient_message, 'payment_confirmation')
+                
+                pharmacy_subject = "Payment Received"
+                pharmacy_message = f"Dear {pharmacy.user.first_name},\n\nYou have received a payment.\n\nTransaction ID: {transaction_id}\nAmount: ${payment.amount}\nPatient: {payment.patient.user.first_name} {payment.patient.user.last_name}\nPayment Method: {payment.payment_method.title()}\n\nPlease prepare the prescription for collection.\n\nBest regards,\nMedical System Team"
+                send_email_notification(pharmacy.user.email, pharmacy_subject, pharmacy_message, 'payment_confirmation')
+                
+                return Response({
+                    'message': 'Payment processed successfully',
+                    'payment': PaymentSerializer(payment).data
+                }, status=status.HTTP_201_CREATED)
+                
+        except Exception as e:
+            logger.error(f"Payment processing error: {str(e)}")
+            return Response({'error': 'Payment processing failed'}, 
+                           status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_payments(request):
+    """Get payments based on user type"""
+    user = request.user
+    
+    if hasattr(user, 'patient'):
+        payments = Payment.objects.filter(patient=user.patient)
+    elif hasattr(user, 'pharmacy'):
+        payments = Payment.objects.filter(pharmacy=user.pharmacy)
+    else:
+        return Response({'error': 'No payments found for this user type'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = PaymentSerializer(payments, many=True)
+    return Response(serializer.data)
+
+# Medical Report Views
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_medical_report(request):
+    """Create medical report - only for doctors"""
+    if not hasattr(request.user, 'doctor'):
+        return Response({'error': 'Only doctors can create medical reports'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = MedicalReportCreateSerializer(data=request.data)
+    if serializer.is_valid():
+        report = serializer.save(doctor=request.user.doctor)
+        
+        # Send notification to patient
+        subject = "Medical Report Available"
+        message = f"Dear {report.patient.user.first_name},\n\nYour medical report is now available.\n\nReport Summary:\n{report.report_content[:200]}...\n\nRecommendations: {report.recommendations}\n\n"
+        
+        if report.follow_up_date:
+            message += f"Follow-up Date: {report.follow_up_date}\n\n"
+        
+        message += "Please contact your doctor if you have any questions.\n\nBest regards,\nMedical System Team"
+        
+        send_email_notification(report.patient.user.email, subject, message, 'general')
+        
+        return Response({
+            'message': 'Medical report created successfully',
+            'report': MedicalReportSerializer(report).data
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_medical_reports(request):
+    """Get medical reports based on user type"""
+    user = request.user
+    
+    if hasattr(user, 'patient'):
+        reports = MedicalReport.objects.filter(patient=user.patient)
+    elif hasattr(user, 'doctor'):
+        reports = MedicalReport.objects.filter(doctor=user.doctor)
+    else:
+        return Response({'error': 'No medical reports found for this user type'}, 
+                       status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = MedicalReportSerializer(reports, many=True)
+    return Response(serializer.data)
+
+# Notification Views
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notifications(request):
+    """Get user notifications"""
+    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
+    serializer = NotificationSerializer(notifications, many=True)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def mark_notification_read(request, notification_id):
+    """Mark notification as read"""
+    try:
+        notification = Notification.objects.get(id=notification_id, recipient=request.user)
+        notification.is_read = True
+        notification.save()
+        
+        return Response({'message': 'Notification marked as read'})
+    except Notification.DoesNotExist:
+        return Response({'error': 'Notification not found'}, 
+                       status=status.HTTP_404_NOT_FOUND)
+
+# Dashboard/Analytics Views
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_dashboard_data(request):
+    """Get dashboard data based on user type"""
+    user = request.user
+    
+    if hasattr(user, 'patient'):
+        data = {
+            'total_appointments': Appointment.objects.filter(patient=user.patient).count(),
+            'pending_appointments': Appointment.objects.filter(patient=user.patient, status='pending').count(),
+            'active_prescriptions': Prescription.objects.filter(patient=user.patient, status='active').count(),
+            'total_payments': Payment.objects.filter(patient=user.patient).count()
+        }
+    elif hasattr(user, 'doctor'):
+        data = {
+            'total_appointments': Appointment.objects.filter(doctor=user.doctor).count(),
+            'pending_appointments': Appointment.objects.filter(doctor=user.doctor, status='pending').count(),
+            'total_prescriptions': Prescription.objects.filter(doctor=user.doctor).count(),
+            'completed_appointments': Appointment.objects.filter(doctor=user.doctor, status='completed').count()
+        }
+    elif hasattr(user, 'pharmacy'):
+        data = {
+            'total_inventory_items': PharmacyInventory.objects.filter(pharmacy=user.pharmacy).count(),
+            'low_stock_items': PharmacyInventory.objects.filter(pharmacy=user.pharmacy, quantity_available__lte=models.F('low_stock_threshold')).count(),
+            'total_payments_received': Payment.objects.filter(pharmacy=user.pharmacy).count(),
+            'total_revenue': Payment.objects.filter(pharmacy=user.pharmacy).aggregate(Sum('amount'))['amount__sum'] or 0
+        }
+    else:
+        data = {'error': 'Invalid user type'}
+    
+    return Response(data)
+
+# System monitoring (auto-generated backend actions)
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def check_low_stock_alerts(request):
+    """System function to check and send low stock alerts"""
+    try:
+        low_stock_items = PharmacyInventory.objects.filter(
+            quantity_available__lte=models.F('low_stock_threshold')
+        )
+        
+        alerts_sent = 0
+        for item in low_stock_items:
+            # Check if alert was already sent recently (within 24 hours)
+            recent_notification = Notification.objects.filter(
+                recipient=item.pharmacy.user,
+                notification_type='low_stock_alert',
+                message__contains=item.drug.name,
+                created_at__gte=timezone.now() - timedelta(hours=24)
+            ).exists()
+            
+            if not recent_notification:
+                subject = f"Low Stock Alert: {item.drug.name}"
+                message = f"Warning: {item.drug.name} is running low in stock.\n\nCurrent quantity: {item.quantity_available}\nThreshold: {item.low_stock_threshold}\n\nPlease restock soon to avoid shortages."
+                
+                send_email_notification(item.pharmacy.user.email, subject, message, 'low_stock_alert')
+                alerts_sent += 1
+        
+        return Response({
+            'message': f'Low stock check completed. {alerts_sent} alerts sent.'
+        })
+        
+    except Exception as e:
+        logger.error(f"Low stock check error: {str(e)}")
+        return Response({'error': 'Low stock check failed'}, 
+                       status=status.HTTP_500_INTERNAL_SERVER_ERROR)
