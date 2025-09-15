@@ -647,6 +647,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                 </button>
                             </div>
 
+                            
+
                             {userdata.user_type === 'admin' && (
                                 <div className="hidden md:flex items-center space-x-2">
                                     <button
