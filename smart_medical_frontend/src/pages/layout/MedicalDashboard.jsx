@@ -650,7 +650,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                             {userdata.user_type === 'admin' && (
                                 <div className="hidden md:flex items-center space-x-2">
                                     <button
-                                        onClick={() => navigate('/dashboard/appointments/book')}
                                         className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
                                     >
                                         Quick Actions
@@ -699,26 +698,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                 <User className="w-4 h-4 mr-3" />
                                                 Profile Settings
                                             </button>
-                                            <button
-                                                onClick={() => {
-                                                    setDropdownOpen(false);
-                                                    navigate('/dashboard/notifications');
-                                                }}
-                                                className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer w-full text-left"
-                                            >
-                                                <Bell className="w-4 h-4 mr-3" />
-                                                Notifications
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setDropdownOpen(false);
-                                                    navigate('/dashboard/settings');
-                                                }}
-                                                className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer w-full text-left"
-                                            >
-                                                <Settings className="w-4 h-4 mr-3" />
-                                                Settings
-                                            </button>
+
                                         </div>
 
                                         <div className="border-t border-gray-50 py-1">
