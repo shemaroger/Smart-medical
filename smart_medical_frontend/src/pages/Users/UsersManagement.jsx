@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import {
     Users, Search, Filter, Plus, Eye, Edit, Trash2, Phone, Mail, MapPin,
     Calendar, Clock, Shield, AlertCircle, CheckCircle, XCircle, User,
-    Stethoscope, Building2, Pill, MoreVertical, Download, RefreshCw
+    Stethoscope, Building2, Pill, MoreVertical, Download, RefreshCw,
+    Loader
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { authService } from '../../api';
+import { useNavigate } from 'react-router-dom';
+
+import { authService, profileService } from '../../api';
 
 const UsersManagement = () => {
     const [users, setUsers] = useState([]);
@@ -13,30 +16,65 @@ const UsersManagement = () => {
     const [selectedUserType, setSelectedUserType] = useState('all');
     const [selectedStatus, setSelectedStatus] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [usersPerPage] = useState(10);
+    const [usersPerPage] = useState(5);
     const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedUserProfile, setSelectedUserProfile] = useState(null);
     const [showUserModal, setShowUserModal] = useState(false);
+    const [loadingProfile, setLoadingProfile] = useState(false);
+    const navigate = useNavigate();
+
     useEffect(() => {
         fetchUsers();
     }, []);
 
     const fetchUsers = async () => {
-
         try {
-
             const response = await authService.getAllUsers();
-            console.log(response)
+            console.log(response);
             if (response.success) {
                 setUsers(response.data.results);
             } else {
                 toast.error('Failed to fetch users');
             }
-
-
         } catch (error) {
             console.error('Error fetching users:', error);
             toast.error('Failed to fetch users');
+        }
+    };
 
+    const fetchUserProfile = async (user) => {
+        setLoadingProfile(true);
+        try {
+            let profileResponse = { success: false };
+
+            switch (user.user_type) {
+                case 'doctor':
+                    profileResponse = await profileService.getDoctorById(user.id);
+                    break;
+                case 'patient':
+                    profileResponse = await profileService.getPatientById(user.id);
+                    break;
+                case 'pharmacy':
+                    profileResponse = await profileService.getPharmacyById(user.id);
+                    break;
+                default:
+                    // For admin users or other types without specific profiles
+                    setSelectedUserProfile(null);
+                    setLoadingProfile(false);
+                    return;
+            }
+
+            if (profileResponse.success) {
+                setSelectedUserProfile(profileResponse.data);
+            } else {
+                console.error('Failed to fetch profile:', profileResponse.error);
+                setSelectedUserProfile(null);
+            }
+        } catch (error) {
+            console.error('Error fetching user profile:', error);
+            setSelectedUserProfile(null);
+        } finally {
+            setLoadingProfile(false);
         }
     };
 
@@ -91,12 +129,27 @@ const UsersManagement = () => {
         });
     };
 
-    const handleViewUser = (user) => {
+    const handleViewUser = async (user) => {
         setSelectedUser(user);
+        setSelectedUserProfile(null);
         setShowUserModal(true);
+
+        // Fetch detailed profile information
+        await fetchUserProfile(user);
     };
 
+    const handleAddUser = () => {
+        console.log('Navigate to add user page');
 
+        navigate('/dashboard/users/add');
+    };
+
+    const closeModal = () => {
+        setShowUserModal(false);
+        setSelectedUser(null);
+        setSelectedUserProfile(null);
+        setLoadingProfile(false);
+    };
 
     return (
         <div className="space-y-6">
@@ -110,13 +163,19 @@ const UsersManagement = () => {
                 </div>
                 <div className="flex items-center space-x-3 mt-4 sm:mt-0">
                     <button
+                        onClick={handleAddUser}
+                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add User
+                    </button>
+                    <button
                         onClick={fetchUsers}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                     >
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Refresh
                     </button>
-
                 </div>
             </div>
 
@@ -196,7 +255,6 @@ const UsersManagement = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -236,12 +294,6 @@ const UsersManagement = () => {
                                                 <Phone className="w-4 h-4 text-gray-400 mr-2" />
                                                 {user.phone_number}
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div className="flex items-center">
-                                            <MapPin className="w-4 h-4 text-gray-400 mr-2" />
-                                            {user.location || 'Not specified'}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -324,12 +376,12 @@ const UsersManagement = () => {
             {/* User Detail Modal */}
             {showUserModal && selectedUser && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-semibold text-gray-900">User Details</h3>
                                 <button
-                                    onClick={() => setShowUserModal(false)}
+                                    onClick={closeModal}
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
                                 >
                                     <XCircle className="w-6 h-6" />
@@ -341,54 +393,109 @@ const UsersManagement = () => {
                             {/* Basic Info */}
                             <div>
                                 <h4 className="text-md font-medium text-gray-900 mb-3">Basic Information</h4>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div><span className="font-medium">Name:</span> {selectedUser.first_name} {selectedUser.last_name}</div>
-                                    <div><span className="font-medium">Username:</span> {selectedUser.username}</div>
-                                    <div><span className="font-medium">Email:</span> {selectedUser.email}</div>
-                                    <div><span className="font-medium">Phone:</span> {selectedUser.phone_number}</div>
-                                    <div><span className="font-medium">Location:</span> {selectedUser.location}</div>
-                                    <div><span className="font-medium">User Type:</span> {selectedUser.user_type}</div>
-                                    <div><span className="font-medium">Joined:</span> {formatDate(selectedUser.created_at)}</div>
-                                    <div><span className="font-medium">Status:</span> {selectedUser.is_active ? 'Active' : 'Inactive'}</div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div><span className="font-medium text-gray-600">Name:</span> {selectedUser.first_name} {selectedUser.last_name}</div>
+                                    <div><span className="font-medium text-gray-600">Username:</span> {selectedUser.username}</div>
+                                    <div><span className="font-medium text-gray-600">Email:</span> {selectedUser.email}</div>
+                                    <div><span className="font-medium text-gray-600">Phone:</span> {selectedUser.phone_number}</div>
+                                    <div><span className="font-medium text-gray-600">Location:</span> {selectedUser.location || 'Not specified'}</div>
+                                    <div><span className="font-medium text-gray-600">User Type:</span> <span className="capitalize">{selectedUser.user_type}</span></div>
+                                    <div><span className="font-medium text-gray-600">Joined:</span> {formatDate(selectedUser.created_at)}</div>
+                                    <div><span className="font-medium text-gray-600">Status:</span>
+                                        <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${selectedUser.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                            {selectedUser.is_active ? 'Active' : 'Inactive'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Type-specific Information */}
-                            {selectedUser.doctor_profile && (
+                            {/* Loading Profile */}
+                            {loadingProfile && (
+                                <div className="flex items-center justify-center py-8">
+                                    <Loader className="w-6 h-6 animate-spin text-blue-600 mr-2" />
+                                    <span className="text-gray-600">Loading profile details...</span>
+                                </div>
+                            )}
+
+                            {/* Profile-specific Information */}
+                            {!loadingProfile && selectedUserProfile && selectedUser.user_type === 'doctor' && (
                                 <div>
                                     <h4 className="text-md font-medium text-gray-900 mb-3">Doctor Profile</h4>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div><span className="font-medium">License:</span> {selectedUser.doctor_profile.license_number}</div>
-                                        <div><span className="font-medium">Specialization:</span> {selectedUser.doctor_profile.specialization}</div>
-                                        <div><span className="font-medium">Hospital:</span> {selectedUser.doctor_profile.hospital_name}</div>
-                                        <div><span className="font-medium">Experience:</span> {selectedUser.doctor_profile.experience_years} years</div>
-                                        <div><span className="font-medium">Verified:</span> {selectedUser.doctor_profile.is_verified ? 'Yes' : 'No'}</div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-blue-50 p-4 rounded-lg">
+                                        <div><span className="font-medium text-gray-600">License Number:</span> {selectedUserProfile.license_number || 'Not provided'}</div>
+                                        <div><span className="font-medium text-gray-600">Specialization:</span> {selectedUserProfile.specialization || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Hospital:</span> {selectedUserProfile.hospital_name || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Experience:</span> {selectedUserProfile.experience_years ? `${selectedUserProfile.experience_years} years` : 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Consultation Fee:</span> {selectedUserProfile.consultation_fee ? `$${selectedUserProfile.consultation_fee}` : 'Not set'}</div>
+                                        <div><span className="font-medium text-gray-600">Verified:</span>
+                                            <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${selectedUserProfile.is_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                {selectedUserProfile.is_verified ? 'Verified' : 'Pending'}
+                                            </span>
+                                        </div>
+                                        {selectedUserProfile.bio && (
+                                            <div className="col-span-2"><span className="font-medium text-gray-600">Bio:</span> {selectedUserProfile.bio}</div>
+                                        )}
                                     </div>
                                 </div>
                             )}
 
-                            {selectedUser.patient_profile && (
+                            {!loadingProfile && selectedUserProfile && selectedUser.user_type === 'patient' && (
                                 <div>
                                     <h4 className="text-md font-medium text-gray-900 mb-3">Patient Profile</h4>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div><span className="font-medium">Date of Birth:</span> {selectedUser.patient_profile.date_of_birth}</div>
-                                        <div><span className="font-medium">Blood Group:</span> {selectedUser.patient_profile.blood_group}</div>
-                                        <div><span className="font-medium">Emergency Contact:</span> {selectedUser.patient_profile.emergency_contact}</div>
-                                        <div><span className="font-medium">Allergies:</span> {selectedUser.patient_profile.allergies || 'None'}</div>
-                                        <div className="col-span-2"><span className="font-medium">Medical History:</span> {selectedUser.patient_profile.medical_history || 'None'}</div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-purple-50 p-4 rounded-lg">
+                                        <div><span className="font-medium text-gray-600">Date of Birth:</span> {selectedUserProfile.date_of_birth ? formatDate(selectedUserProfile.date_of_birth) : 'Not provided'}</div>
+                                        <div><span className="font-medium text-gray-600">Gender:</span> {selectedUserProfile.gender || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Blood Group:</span> {selectedUserProfile.blood_group || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Emergency Contact:</span> {selectedUserProfile.emergency_contact || 'Not provided'}</div>
+                                        <div><span className="font-medium text-gray-600">Height:</span> {selectedUserProfile.height ? `${selectedUserProfile.height} cm` : 'Not provided'}</div>
+                                        <div><span className="font-medium text-gray-600">Weight:</span> {selectedUserProfile.weight ? `${selectedUserProfile.weight} kg` : 'Not provided'}</div>
+                                        {selectedUserProfile.allergies && (
+                                            <div className="col-span-2"><span className="font-medium text-gray-600">Allergies:</span> {selectedUserProfile.allergies}</div>
+                                        )}
+                                        {selectedUserProfile.medical_history && (
+                                            <div className="col-span-2"><span className="font-medium text-gray-600">Medical History:</span> {selectedUserProfile.medical_history}</div>
+                                        )}
                                     </div>
                                 </div>
                             )}
 
-                            {selectedUser.pharmacy_profile && (
+                            {!loadingProfile && selectedUserProfile && selectedUser.user_type === 'pharmacy' && (
                                 <div>
                                     <h4 className="text-md font-medium text-gray-900 mb-3">Pharmacy Profile</h4>
-                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                        <div><span className="font-medium">License:</span> {selectedUser.pharmacy_profile.license_number}</div>
-                                        <div><span className="font-medium">Name:</span> {selectedUser.pharmacy_profile.pharmacy_name}</div>
-                                        <div><span className="font-medium">Address:</span> {selectedUser.pharmacy_profile.address}</div>
-                                        <div><span className="font-medium">Verified:</span> {selectedUser.pharmacy_profile.is_verified ? 'Yes' : 'No'}</div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-green-50 p-4 rounded-lg">
+                                        <div><span className="font-medium text-gray-600">License Number:</span> {selectedUserProfile.license_number || 'Not provided'}</div>
+                                        <div><span className="font-medium text-gray-600">Pharmacy Name:</span> {selectedUserProfile.pharmacy_name || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Address:</span> {selectedUserProfile.address || 'Not provided'}</div>
+                                        <div><span className="font-medium text-gray-600">Operating Hours:</span> {selectedUserProfile.operating_hours || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Contact Person:</span> {selectedUserProfile.contact_person || 'Not specified'}</div>
+                                        <div><span className="font-medium text-gray-600">Verified:</span>
+                                            <span className={`ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${selectedUserProfile.is_verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                                {selectedUserProfile.is_verified ? 'Verified' : 'Pending'}
+                                            </span>
+                                        </div>
+                                        {selectedUserProfile.description && (
+                                            <div className="col-span-2"><span className="font-medium text-gray-600">Description:</span> {selectedUserProfile.description}</div>
+                                        )}
                                     </div>
+                                </div>
+                            )}
+
+                            {!loadingProfile && !selectedUserProfile && selectedUser.user_type !== 'admin' && (
+                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <div className="flex items-center">
+                                        <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+                                        <span className="text-yellow-800 text-sm">No detailed profile information available for this user.</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {selectedUser.user_type === 'admin' && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                    <div className="flex items-center">
+                                        <Shield className="w-5 h-5 text-red-600 mr-2" />
+                                        <span className="text-red-800 text-sm font-medium">Administrator Account</span>
+                                    </div>
+                                    <p className="text-red-700 text-sm mt-1">This user has administrative privileges in the system.</p>
                                 </div>
                             )}
                         </div>

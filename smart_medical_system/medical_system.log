@@ -6,3 +6,26 @@ ERROR 2025-09-14 10:16:07,223 views 22384 20408 Failed to send email to test@tes
 ERROR 2025-09-14 10:18:00,496 views 5076 19168 Failed to send email to test@test.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-3e760786c95sm13213061f8f.17 - gsmtp')
 ERROR 2025-09-14 10:21:20,997 views 13688 21664 Failed to send email to test@test.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials ffacd0b85a97d-3e86602a7d5sm5436260f8f.62 - gsmtp')
 INFO 2025-09-14 10:22:56,725 views 11508 2564 Email sent successfully to test@test.com
+INFO 2025-09-14 10:48:24,528 views 10420 7728 Email sent successfully to shemaroger43@gmail.com
+INFO 2025-09-14 10:51:01,147 views 10420 13720 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-16 17:33:45,387 views 14436 22432 Email sent successfully to admin@admin.com
+INFO 2025-09-16 18:44:22,789 views 5036 12172 Email sent successfully to test@test.com
+INFO 2025-09-16 19:16:41,623 views 11716 1504 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-16 19:17:46,111 views 11716 28284 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 09:36:52,275 views 8984 8844 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 09:36:55,368 views 8984 8844 Email sent successfully to test@test.com
+INFO 2025-09-17 09:37:55,531 views 24456 1440 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 09:37:58,752 views 24456 1440 Email sent successfully to test@test.com
+INFO 2025-09-17 09:40:32,007 views 18436 13932 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 09:40:35,139 views 18436 13932 Email sent successfully to test@test.com
+INFO 2025-09-17 09:46:30,660 views 25344 14656 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 09:46:33,820 views 25344 14656 Email sent successfully to test@test.com
+INFO 2025-09-17 10:08:37,105 views 5360 21640 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 10:25:18,779 views 5360 24456 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 11:00:23,911 views 23668 13952 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 12:38:14,387 views 27928 9860 Email sent successfully to phamacy@gmail.com
+INFO 2025-09-17 12:40:09,418 views 27928 24304 Email sent successfully to phamacy@gmail.com
+INFO 2025-09-17 12:54:01,239 views 5016 13200 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 12:56:44,179 views 5016 24876 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 12:56:49,317 views 5016 24876 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-17 16:45:59,965 views 18780 6944 Email sent successfully to test20@gmail.com

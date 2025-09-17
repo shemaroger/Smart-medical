@@ -6,12 +6,13 @@ import {
     CheckCircle, ArrowRight, Eye, EyeOff, Heart, UserCheck
 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { profileService, getCurrentUser } from '../../api';
+import { profileService, getCurrentUser, hospitalService } from '../../api';
 
 const ProfileCompletionPage = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [loadingHospitals, setLoadingHospitals] = useState(false);
     const [userType, setUserType] = useState('');
     const [userData, setUserData] = useState(null);
     const [hospitals, setHospitals] = useState([]);
@@ -37,18 +38,6 @@ const ProfileCompletionPage = () => {
     });
 
     const [errors, setErrors] = useState({});
-
-    // Mock hospitals data - replace with API call
-    const mockHospitals = [
-        { id: 1, name: 'University Teaching Hospital of Kigali (CHUK)' },
-        { id: 2, name: 'King Faisal Hospital Rwanda' },
-        { id: 3, name: 'Rwanda Military Hospital' },
-        { id: 4, name: 'Kibagabaga Hospital' },
-        { id: 5, name: 'Butare University Teaching Hospital (CHUB)' },
-        { id: 6, name: 'Rwamagana Hospital' },
-        { id: 7, name: 'Muhima Hospital' },
-        { id: 8, name: 'Nyagatare Hospital' }
-    ];
 
     const bloodGroups = [
         { value: '', label: 'Select Blood Group (Optional)' },
@@ -76,8 +65,10 @@ const ProfileCompletionPage = () => {
 
     useEffect(() => {
         checkProfileStatus();
-        setHospitals(mockHospitals);
-    }, []);
+        if (userType === 'doctor') {
+            fetchHospitals();
+        }
+    }, [userType]);
 
     const checkProfileStatus = async () => {
         try {
@@ -90,11 +81,9 @@ const ProfileCompletionPage = () => {
             setUserData(user);
             setUserType(user.user_type);
 
-            // Check if profile already exists
             const profileResponse = await profileService.getCurrentProfile();
 
             if (profileResponse.success && profileResponse.data) {
-                // Profile exists, redirect to dashboard
                 toast.info('Profile already completed. Redirecting to dashboard...');
                 setTimeout(() => {
                     navigate('/dashboard');
@@ -106,6 +95,31 @@ const ProfileCompletionPage = () => {
         } catch (error) {
             console.error('Error checking profile status:', error);
             setLoading(false);
+        }
+    };
+
+    const fetchHospitals = async () => {
+        setLoadingHospitals(true);
+        try {
+            const response = await hospitalService.getAll();
+            if (response.success) {
+                // Handle different response structures
+                const hospitalData = response.data.results || response.data || [];
+                // Filter only active hospitals
+                const activeHospitals = hospitalData.filter(hospital => hospital.is_active);
+                setHospitals(activeHospitals);
+            } else {
+                console.error('Failed to fetch hospitals:', response.error);
+                toast.error('Failed to load hospitals. Please refresh the page.');
+                // Fallback to empty array if API fails
+                setHospitals([]);
+            }
+        } catch (error) {
+            console.error('Error fetching hospitals:', error);
+            toast.error('Failed to load hospitals. Please refresh the page.');
+            setHospitals([]);
+        } finally {
+            setLoadingHospitals(false);
         }
     };
 
@@ -166,7 +180,6 @@ const ProfileCompletionPage = () => {
         try {
             let response;
 
-
             switch (userType) {
                 case 'patient':
                     response = await profileService.createPatientProfile({
@@ -179,16 +192,16 @@ const ProfileCompletionPage = () => {
                     break;
                 case 'doctor':
                     response = await profileService.createDoctorProfile({
-                        user: userData.id, // Add user ID
+                        user: userData.id,
                         license_number: formData.license_number,
                         specialization: formData.specialization,
-                        hospital: formData.hospital,
+                        hospital: formData.hospital, // This is already the hospital ID
                         experience_years: parseInt(formData.experience_years)
                     });
                     break;
                 case 'pharmacy':
                     response = await profileService.createPharmacyProfile({
-                        user: userData.id, // Add user ID
+                        user: userData.id,
                         license_number: formData.license_number,
                         pharmacy_name: formData.pharmacy_name,
                         address: formData.address,
@@ -214,7 +227,6 @@ const ProfileCompletionPage = () => {
             setSubmitting(false);
         }
     };
-
 
     const renderUserTypeIcon = () => {
         switch (userType) {
@@ -392,18 +404,29 @@ const ProfileCompletionPage = () => {
                                     name="hospital"
                                     value={formData.hospital}
                                     onChange={handleInputChange}
-                                    className={`w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.hospital ? 'border-red-300' : 'border-gray-300'
-                                        }`}
+                                    disabled={loadingHospitals}
+                                    className={`w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.hospital ? 'border-red-300' : 'border-gray-300'} ${loadingHospitals ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    <option value="">Select Hospital</option>
+                                    <option value="">
+                                        {loadingHospitals ? 'Loading hospitals...' : 'Select Hospital'}
+                                    </option>
                                     {hospitals.map((hospital) => (
-                                        <option key={hospital.name} value={hospital.name}>
+                                        <option key={hospital.id} value={hospital.id}>
                                             {hospital.name}
                                         </option>
                                     ))}
                                 </select>
+                                {loadingHospitals && (
+                                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 animate-spin" />
+                                )}
                             </div>
                             {errors.hospital && <p className="text-red-600 text-sm mt-1">{errors.hospital}</p>}
+                            {hospitals.length === 0 && !loadingHospitals && (
+                                <p className="text-amber-600 text-sm mt-1 flex items-center">
+                                    <AlertCircle className="w-4 h-4 mr-1" />
+                                    No hospitals available. Please try refreshing the page.
+                                </p>
+                            )}
                         </div>
 
                         <div>
@@ -558,7 +581,7 @@ const ProfileCompletionPage = () => {
 
                     <button
                         type="submit"
-                        disabled={submitting}
+                        disabled={submitting || (userType === 'doctor' && loadingHospitals)}
                         className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {submitting ? (

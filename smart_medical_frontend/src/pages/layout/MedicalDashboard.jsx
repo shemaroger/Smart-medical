@@ -83,7 +83,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     path: '/dashboard/appointments/list',
                     icon: <List className="w-4 h-4" />,
                     description: 'View all appointments',
-                    roles: ['patient', 'doctor']
+                    roles: ['doctor']
                 },
                 {
                     name: 'Book Appointment',
@@ -117,13 +117,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     icon: <List className="w-4 h-4" />,
                     description: 'View all prescriptions',
                     roles: ['patient', 'doctor']
-                },
-                {
-                    name: 'Create Prescription',
-                    path: '/dashboard/prescriptions/create',
-                    icon: <PlusCircle className="w-4 h-4" />,
-                    description: 'Create new prescription',
-                    roles: ['doctor']
                 },
                 {
                     name: 'Pharmacy Finder',
@@ -243,13 +236,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     description: 'User management',
                     roles: ['admin']
                 },
-                {
-                    name: 'Pending Approvals',
-                    path: '/dashboard/users/pending',
-                    icon: <Clock className="w-4 h-4" />,
-                    description: 'User verification queue',
-                    roles: ['admin']
-                },
+
                 {
                     name: 'System Reports',
                     path: '/dashboard/users/reports',
@@ -269,20 +256,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             roles: ['patient', 'admin'],
             hasSubItems: true,
             subItems: [
-                {
-                    name: 'Find Hospitals',
-                    path: '/dashboard/hospitals/list',
-                    icon: <Search className="w-4 h-4" />,
-                    description: 'Hospital directory',
-                    roles: ['patient']
-                },
-                {
-                    name: 'Find Doctors',
-                    path: '/dashboard/doctors/list',
-                    icon: <UserCheck className="w-4 h-4" />,
-                    description: 'Doctor directory',
-                    roles: ['patient']
-                },
                 {
                     name: 'Manage Providers',
                     path: '/dashboard/providers/manage',
@@ -309,13 +282,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     description: 'Search medication database',
                     roles: ['admin', 'doctor', 'pharmacy']
                 },
-                {
-                    name: 'Add Medication',
-                    path: '/dashboard/drugs/add',
-                    icon: <PlusCircle className="w-4 h-4" />,
-                    description: 'Add new medication',
-                    roles: ['admin']
-                }
+
             ]
         }
     ];
@@ -646,9 +613,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                     </span>
                                 </button>
                             </div>
-
-                            
-
                             {userdata.user_type === 'admin' && (
                                 <div className="hidden md:flex items-center space-x-2">
                                     <button
@@ -659,7 +623,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                     <div className="w-px h-6 bg-gray-200"></div>
                                 </div>
                             )}
-
                             <div className="relative">
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}

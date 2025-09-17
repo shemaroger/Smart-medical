@@ -153,7 +153,7 @@ export const authService = {
 // PROFILE SERVICES
 // =============================================================================
 export const profileService = {
-    // Create Doctor Profile
+    // -------- CREATE --------
     async createDoctorProfile(profileData) {
         try {
             const response = await api.post('/profiles/doctor/create/', profileData);
@@ -163,7 +163,6 @@ export const profileService = {
         }
     },
 
-    // Create Patient Profile
     async createPatientProfile(profileData) {
         try {
             const response = await api.post('/profiles/patient/create/', profileData);
@@ -173,7 +172,6 @@ export const profileService = {
         }
     },
 
-    // Create Pharmacy Profile
     async createPharmacyProfile(profileData) {
         try {
             const response = await api.post('/profiles/pharmacy/create/', profileData);
@@ -183,7 +181,7 @@ export const profileService = {
         }
     },
 
-    // Get current user profile based on user type
+    // -------- CURRENT USER PROFILE --------
     async getCurrentProfile() {
         try {
             const user = getCurrentUser();
@@ -209,12 +207,93 @@ export const profileService = {
         } catch (error) {
             return { success: false, error: handleError(error) };
         }
-    }
+    },
+
+    // =======================
+    //        DOCTORS
+    // =======================
+
+    /**
+     * List doctors (optional filters)
+     * @param {Object} params
+     * @param {string} [params.id] - doctor/user id (PK)
+     * @param {string} [params.hospital_id] - hospital UUID
+     * @param {boolean|string} [params.is_verified] - true/false
+     */
+    async listDoctorProfiles(params = {}) {
+        try {
+            const response = await api.get('/profiles/doctors/', { params });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    async getDoctorById(id) {
+        try {
+            const response = await api.get(`/profiles/doctors/${id}/`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    // =======================
+    //        PATIENTS
+    // =======================
+
+    /**
+     * List patients (optional filter by id)
+     */
+    async listPatientProfiles(params = {}) {
+        try {
+            const response = await api.get('/profiles/patients/', { params });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    async getPatientById(id) {
+        try {
+            const response = await api.get(`/profiles/patients/${id}/`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    // =======================
+    //       PHARMACIES
+    // =======================
+
+    /**
+     * List pharmacies (optional filter by id)
+     */
+    async listPharmacyProfiles(params = {}) {
+        try {
+            const response = await api.get('/profiles/pharmacies/', { params });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    async getPharmacyById(id) {
+        try {
+            const response = await api.get(`/profiles/pharmacies/${id}/`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
 };
+
 
 // =============================================================================
 // HOSPITAL SERVICES
 // =============================================================================
+
 export const hospitalService = {
     // Get all hospitals
     async getAll() {
@@ -419,8 +498,78 @@ export const prescriptionService = {
         } catch (error) {
             return { success: false, error: handleError(error) };
         }
+    },
+    async getByAppointment(appointmentId) {
+        try {
+            const response = await api.get(`/prescriptions/by-appointment/${appointmentId}/`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+};
+
+
+
+// =============================================================================
+// ORDER SERVICES
+// =============================================================================
+
+export const orderService = {
+    // Get all orders (with optional filters)
+    async getAll(filters = {}) {
+        try {
+            const params = new URLSearchParams();
+            if (filters.status) params.append('status', filters.status);
+            if (filters.is_paid !== undefined && filters.is_paid !== null) params.append('is_paid', filters.is_paid);
+            if (filters.date_from) params.append('date_from', filters.date_from);
+            if (filters.date_to) params.append('date_to', filters.date_to);
+            if (filters.search) params.append('search', filters.search);
+            if (filters.page) params.append('page', filters.page);
+            if (filters.page_size) params.append('page_size', filters.page_size);
+
+            const queryString = params.toString();
+            const url = queryString ? `/orders/?${queryString}` : '/orders/';
+
+            const response = await api.get(url);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    // Create order
+    async create(orderData) {
+        try {
+            const response = await api.post('/orders/create/', orderData);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    // Get order by ID
+    async getById(id) {
+        try {
+            const response = await api.get(`/orders/${id}/`);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    // Update order status / payment (PATCH)
+    // Allowed fields server-side: { status, is_paid }
+    async updateStatus(id, payload) {
+        try {
+            const response = await api.patch(`/orders/${id}/update-status/`, payload);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
     }
 };
+
 
 // =============================================================================
 // PHARMACY INVENTORY SERVICES

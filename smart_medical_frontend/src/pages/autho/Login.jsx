@@ -33,37 +33,30 @@ const LoginPage = () => {
         }));
     };
 
-    const checkProfileCompletion = async (userData) => {
+    const checkProfileCompletion = (userData) => {
         // Admin users don't need profile completion
         if (userData.user_type === 'admin') {
             return { hasProfile: true, redirectUrl: '/dashboard' };
         }
 
-        try {
-            const profileResponse = await profileService.getCurrentProfile();
-
-            if (profileResponse.success && profileResponse.data) {
-                // Profile exists - redirect to appropriate dashboard
-                switch (userData.user_type) {
-                    case 'patient':
-                        return { hasProfile: true, redirectUrl: '/dashboard' };
-                    case 'doctor':
-                        return { hasProfile: true, redirectUrl: '/dashboard' };
-                    case 'pharmacy':
-                        return { hasProfile: true, redirectUrl: '/dashboard' };
-                    default:
-                        return { hasProfile: true, redirectUrl: '/dashboard' };
-                }
-            } else {
-                // Profile doesn't exist - redirect to profile completion
-                return { hasProfile: false, redirectUrl: '/complete-profile' };
+        if (userData.hasProfile) {
+            // Profile exists - redirect based on user type
+            switch (userData.user_type) {
+                case 'patient':
+                    return { hasProfile: true, redirectUrl: '/dashboard' };
+                case 'doctor':
+                    return { hasProfile: true, redirectUrl: '/dashboard' };
+                case 'pharmacy':
+                    return { hasProfile: true, redirectUrl: '/dashboard' };
+                default:
+                    return { hasProfile: true, redirectUrl: '/dashboard' };
             }
-        } catch (error) {
-            console.warn('Profile check failed:', error);
-            // On error, assume profile completion needed
+        } else {
+            // Profile doesn't exist - send them to completion page
             return { hasProfile: false, redirectUrl: '/complete-profile' };
         }
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -83,8 +76,10 @@ const LoginPage = () => {
 
                 toast.success('Login successful! Checking profile status...');
 
-                // Check if user has completed their profile
-                const profileStatus = await checkProfileCompletion(userData);
+                const profileStatus = checkProfileCompletion(userData);
+
+                console.log(response);
+                console.log(profileStatus);
 
                 if (!profileStatus.hasProfile) {
                     toast.info('Please complete your profile to continue...');

@@ -64,13 +64,13 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 
                  'phone_number', 'user_type', 'preferred_language', 'location', 
-                 'is_phone_verified', 'created_at']
-        read_only_fields = ['id', 'created_at']
+                 'is_phone_verified', 'created_at','hasProfile','is_active']
+        read_only_fields = ['id', 'created_at','is_active']
 
 class HospitalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Hospital
-        fields = ['id', 'name', 'address', 'phone', 'email', 'location', 
+        fields = ['id','name', 'address', 'phone', 'email', 'location', 
                  'is_active', 'created_at']
         read_only_fields = ['id', 'created_at']
 
@@ -83,10 +83,16 @@ class DoctorSerializer(serializers.ModelSerializer):
                  'experience_years', 'is_verified']
 
 class DoctorCreateSerializer(serializers.ModelSerializer):
-    
+    hospital = serializers.PrimaryKeyRelatedField(queryset=Hospital.objects.all())
+
     class Meta:
         model = Doctor
-        fields = ['license_number', 'specialization', 'hospital', 'experience_years']
+        fields = [
+            'license_number', 
+            'specialization', 
+            'hospital', 
+            'experience_years'
+        ]
 
     def create(self, validated_data):
         return super().create(validated_data)
@@ -157,9 +163,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Appointment
-        fields = ['id', 'patient', 'doctor', 'hospital', 'appointment_date', 
+        fields = ['id','patient', 'doctor', 'hospital', 'appointment_date', 
                  'reason', 'status', 'notes', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at']
 
 class AppointmentCreateSerializer(serializers.ModelSerializer):
     doctor_id = serializers.UUIDField()
@@ -302,3 +308,29 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         model = SystemSettings
         fields = ['key', 'value', 'description', 'updated_at']
         read_only_fields = ['updated_at']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    pharmacy_name = serializers.CharField(source='pharmacy.pharmacy_name', read_only=True)
+    patient_name = serializers.SerializerMethodField()
+    doctor_name = serializers.SerializerMethodField()
+    prescription_id = serializers.CharField(source='prescription.id', read_only=True)
+
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'pharmacy', 'pharmacy_name', 'patient', 'patient_name',
+            'doctor', 'doctor_name', 'prescription', 'prescription_id',
+            'status', 'is_paid', 'total_amount', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def get_patient_name(self, obj):
+        if obj.patient and hasattr(obj.patient, 'user'):
+            return f"{obj.patient.user.first_name} {obj.patient.user.last_name}"
+        return str(obj.patient)
+
+    def get_doctor_name(self, obj):
+        if obj.doctor and hasattr(obj.doctor, 'user'):
+            return f"{obj.doctor.user.first_name} {obj.doctor.user.last_name}"
+        return None

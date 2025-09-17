@@ -23,7 +23,7 @@ class User(AbstractUser):
     user_type = models.CharField(max_length=20, choices=USER_TYPES)
     phone_number = models.CharField(max_length=15, unique=True)
     preferred_language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default='en')
-    is_phone_verified = models.BooleanField(default=False)
+    is_phone_verified = models.BooleanField(default=True)
     hasProfile = models.BooleanField(default=False)
     location = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -49,9 +49,9 @@ class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     license_number = models.CharField(max_length=50, unique=True)
     specialization = models.CharField(max_length=100)
-    hospital = models.CharField(max_length=50, unique=True)
+    hospital = models.ForeignKey(Hospital,on_delete=models.CASCADE,related_name="doctors")     
     experience_years = models.PositiveIntegerField()
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=True)
 
     def __str__(self):
         return f"Dr. {self.user.first_name} {self.user.last_name}"
@@ -73,7 +73,7 @@ class Pharmacy(models.Model):
     pharmacy_name = models.CharField(max_length=255)
     address = models.TextField()
     location = models.CharField(max_length=255)
-    is_verified = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=True)
 
     def __str__(self):
         return self.pharmacy_name
@@ -266,3 +266,30 @@ class SystemSettings(models.Model):
 
     def __str__(self):
         return f"{self.key}: {self.value}"
+    
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    pharmacy = models.ForeignKey(Pharmacy,on_delete=models.CASCADE,related_name='orders')
+    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='patient_orders',limit_choices_to={'user_type': 'patient'})
+    doctor = models.ForeignKey(Doctor,on_delete=models.SET_NULL,related_name='doctor_orders',null=True,blank=True,limit_choices_to={'user_type': 'doctor'} )
+    prescription = models.ForeignKey(Prescription,on_delete=models.CASCADE,related_name='orders')
+    status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='pending')
+    is_paid = models.BooleanField(default=False,verbose_name='Payment Status' )
+    total_amount = models.DecimalField(max_digits=10,decimal_places=2,validators=[MinValueValidator(0)],default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Order'
+        verbose_name_plural = 'Orders'
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.get_status_display()} - {self.patient}"

@@ -75,11 +75,17 @@ const MultiStepSignupPage = () => {
         try {
             // Simulate API call
             console.log('Form submitted:', formData);
-            await authService.register(formData);
-            toast.success('Registration successful! Redirecting to login...');
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 2000);
+            const response = await authService.register(formData);
+
+            if (response) {
+                toast.success('Registration successful! Redirecting to login...');
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+            } else {
+                console.log(response)
+                toast.error('An unexpected error occurred. Please try again.');
+            }
         } catch (err) {
             console.log(err)
             toast.error('An unexpected error occurred. Please try again.');
