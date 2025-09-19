@@ -36,23 +36,22 @@ const LoginPage = () => {
     const checkProfileCompletion = (userData) => {
         // Admin users don't need profile completion
         if (userData.user_type === 'admin') {
-            return { hasProfile: true, redirectUrl: '/dashboard' };
+            return { hasProfile: true, redirectUrl: '/dashboard/system/overview' };
         }
 
         if (userData.hasProfile) {
             // Profile exists - redirect based on user type
             switch (userData.user_type) {
                 case 'patient':
-                    return { hasProfile: true, redirectUrl: '/dashboard' };
+                    return { hasProfile: true, redirectUrl: '/dashboard/patient/overview' };
                 case 'doctor':
-                    return { hasProfile: true, redirectUrl: '/dashboard' };
+                    return { hasProfile: true, redirectUrl: '/dashboard/doctor/overview' };
                 case 'pharmacy':
-                    return { hasProfile: true, redirectUrl: '/dashboard' };
+                    return { hasProfile: true, redirectUrl: '/dashboard/pharmacy/overview' };
                 default:
                     return { hasProfile: true, redirectUrl: '/dashboard' };
             }
         } else {
-            // Profile doesn't exist - send them to completion page
             return { hasProfile: false, redirectUrl: '/complete-profile' };
         }
     };

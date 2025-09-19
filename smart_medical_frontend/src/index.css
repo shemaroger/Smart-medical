@@ -3,3 +3,10 @@
 * {
     font-family: 'Poppins', sans-serif;
   }
+
+@media print {
+    .print-hide {
+      display: none !important;
+    }
+  }
+  

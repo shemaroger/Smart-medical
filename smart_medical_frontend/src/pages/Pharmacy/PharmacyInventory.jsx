@@ -22,7 +22,6 @@ const PharmacyInventory = () => {
     const [stockFilter, setStockFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(12);
-    const [userData, setUserData] = useState(null);
 
     const [createFormData, setCreateFormData] = useState({
         drug: '',
@@ -62,7 +61,7 @@ const PharmacyInventory = () => {
                 toast.error('Please log in to access inventory management');
                 return;
             }
-            setUserData(user);
+
 
             await Promise.all([
                 fetchInventory(),
@@ -310,10 +309,12 @@ const PharmacyInventory = () => {
         });
     };
 
+
     const formatCurrency = (amount) => {
-        return new Intl.NumberFormat('en-US', {
+        return new Intl.NumberFormat('en-RW', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'RWF',
+            currencyDisplay: 'code'
         }).format(amount);
     };
 
@@ -427,7 +428,7 @@ const PharmacyInventory = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                     <div className="flex items-center">
                         <div className="p-3 rounded-lg bg-blue-100">
@@ -476,17 +477,7 @@ const PharmacyInventory = () => {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-lg bg-green-100">
-                            <DollarSign className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Total Value</p>
-                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue)}</p>
-                        </div>
-                    </div>
-                </div>
+
             </div>
 
             {/* Filters */}
@@ -534,90 +525,98 @@ const PharmacyInventory = () => {
 
             {/* Inventory Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {paginatedInventory.map((item) => {
-                    const status = getStockStatus(item);
-                    return (
-                        <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                            <div className="p-6">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                        <Pill className="w-6 h-6 text-white" />
-                                    </div>
-                                    <div className="flex space-x-1">
-                                        <button
-                                            onClick={() => handleViewDetails(item)}
-                                            className="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
-                                            title="View Details"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleEditItem(item)}
-                                            className="text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors"
-                                            title="Edit Item"
-                                        >
-                                            <Edit className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteItem(item)}
-                                            className="text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors"
-                                            title="Delete Item"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900 truncate" title={item.drug?.name}>
-                                            {item.drug?.name}
-                                        </h3>
-                                        <p className="text-sm text-gray-500 truncate" title={item.drug?.generic_name}>
-                                            {item.drug?.generic_name}
-                                        </p>
+                {paginatedInventory.length > 0 ? (
+                    paginatedInventory.map((item) => {
+                        const status = getStockStatus(item);
+                        return (
+                            <div key={item.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+                                <div className="p-6">
+                                    <div className="flex items-start justify-between mb-4">
+                                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                            <Pill className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div className="flex space-x-1">
+                                            <button
+                                                onClick={() => handleViewDetails(item)}
+                                                className="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
+                                                title="View Details"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleEditItem(item)}
+                                                className="text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors"
+                                                title="Edit Item"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteItem(item)}
+                                                className="text-red-600 hover:text-red-900 p-1 rounded-lg hover:bg-red-50 transition-colors"
+                                                title="Delete Item"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${status.color}-100 text-${status.color}-800`}>
-                                            <status.icon className="w-3 h-3 mr-1" />
-                                            {status.label}
-                                        </span>
-                                        <span className="text-lg font-bold text-gray-900">
-                                            {formatCurrency(item.price_per_unit)}
-                                        </span>
-                                    </div>
+                                    <div className="space-y-3">
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900 truncate" title={item.drug?.name}>
+                                                {item.drug?.name}
+                                            </h3>
+                                            <p className="text-sm text-gray-500 truncate" title={item.drug?.generic_name}>
+                                                {item.drug?.generic_name}
+                                            </p>
+                                        </div>
 
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">Stock:</span>
-                                            <span className={`font-medium ${isLowStock(item) ? 'text-red-600' : 'text-gray-900'}`}>
-                                                {item.quantity_available} units
+                                        <div className="flex items-center justify-between">
+                                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-${status.color}-100 text-${status.color}-800`}>
+                                                <status.icon className="w-3 h-3 mr-1" />
+                                                {status.label}
+                                            </span>
+                                            <span className="text-lg font-bold text-gray-900">
+                                                {formatCurrency(item.price_per_unit)}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">Threshold:</span>
-                                            <span className="text-gray-900">{item.low_stock_threshold}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-600">Expires:</span>
-                                            <span className={`${isExpiringSoon(item) || isExpired(item) ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
-                                                {formatDate(item.expiry_date)}
-                                            </span>
-                                        </div>
-                                    </div>
 
-                                    <div className="pt-2 border-t border-gray-100">
-                                        <div className="flex justify-between text-xs text-gray-400">
-                                            <span>Value: {formatCurrency(item.quantity_available * parseFloat(item.price_per_unit))}</span>
-                                            <span>Updated: {formatDate(item.last_updated)}</span>
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600">Stock:</span>
+                                                <span className={`font-medium ${isLowStock(item) ? 'text-red-600' : 'text-gray-900'}`}>
+                                                    {item.quantity_available} units
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600">Threshold:</span>
+                                                <span className="text-gray-900">{item.low_stock_threshold}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-gray-600">Expires:</span>
+                                                <span className={`${isExpiringSoon(item) || isExpired(item) ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                                                    {formatDate(item.expiry_date)}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-2 border-t border-gray-100">
+                                            <div className="flex justify-between text-xs text-gray-400">
+                                                <span>Value: {formatCurrency(item.quantity_available * parseFloat(item.price_per_unit))}</span>
+                                                <span>Updated: {formatDate(item.last_updated)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                ) : (
+                    <div className="col-span-full text-center py-12">
+                        <Pill className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No inventory items found</h3>
+                        <p className="text-gray-500">Try adjusting your search or filter criteria</p>
+                    </div>
+                )}
             </div>
 
             {/* Pagination */}

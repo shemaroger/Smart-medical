@@ -17,6 +17,21 @@ import DrugManagement from './pages/Drug/DrugManagement';
 import PharmacyInventory from './pages/Pharmacy/PharmacyInventory';
 import AddUser from './pages/Users/AddUserForm';
 import PatientPrescriptions from './pages/Prescription/PatientPrescriptions';
+import PatientOrders from './pages/Orders/PatientOrders';
+import PharmacyOrders from './pages/Orders/PharmacyOrders';
+import DrugCatalog from './pages/Drug/DrugCatalog';
+import PendingAppointments from './pages/Appointments/PendingAppointments';
+import PatientDashboard from './pages/Dashboards/PatientDashboard';
+import DoctorDashboard from './pages/Dashboards/DoctorDashboard';
+import UserProfile from './pages/Users/UserProfile';
+import PharmacyDashboard from './pages/Dashboards/PharmacyDashboard';
+import AdminDashboard from './pages/Dashboards/AdminDashboard';
+import UserAnalyticsReport from './pages/Users/UserAnalyticsReport';
+import DrugAnalyticsReportPage from './pages/Drug/DrugAnalyticsReportPage';
+import AppointmentAnalyticsReport from './pages/Appointments/AppointmentAnalyticsReport';
+import DoctorAppointmentReport from './pages/Appointments/DoctorAppointmentReport';
+import PharmacyOrderAnalyticsReport from './pages/Orders/PharmacyOrderAnalyticsReport';
+import PharmacyInventoryAnalyticsReport from './pages/Pharmacy/PharmacyInventoryAnalyticsReport';
 function App() {
   return (
     <>
@@ -30,17 +45,40 @@ function App() {
 
           <Route path="/dashboard" element={<Dashboard />}>
 
-            <Route path="overview" element={<Dashboard />}></Route>
+            <Route path="system/overview" element={<AdminDashboard />}></Route>
+            <Route path="patient/overview" element={<PatientDashboard />}></Route>
+            <Route path="doctor/overview" element={<DoctorDashboard />}></Route>
+            <Route path="pharmacy/overview" element={<PharmacyDashboard />}></Route>
+
             <Route path="users/list" element={<UsersManagement />}></Route>
             <Route path="providers/manage" element={<HospitalManagement />}></Route>
             <Route path="appointments/book" element={<PatientAppointments />}></Route>
             <Route path="appointments/list" element={<AdminAppointments />}></Route>
+            <Route path="appointments/pending/list" element={<PendingAppointments />}></Route>
             <Route path="prescriptions/create" element={<CreatePrescription />} />
             <Route path="prescriptions/list" element={<DoctorPrescriptions />} />
             <Route path="drugs/list" element={<DrugManagement />} />
+            <Route path="all/drugs/list" element={<DrugCatalog />} />
             <Route path="inventory/list" element={<PharmacyInventory />} />
             <Route path="users/add" element={<AddUser />} />
             <Route path="prescriptions/patients/list" element={<PatientPrescriptions />} />
+            <Route path="patients/request/list" element={<PatientOrders />} />
+            <Route path="pharmacy/request/list" element={<PharmacyOrders />} />
+            <Route path="user/profile" element={<UserProfile />} />
+
+            {/* Reporting */}
+            <Route path="users/report" element={<UserAnalyticsReport />} />
+            <Route path="drugs/report" element={<DrugAnalyticsReportPage />} />
+            <Route path="patient/appointment/report" element={<AppointmentAnalyticsReport />} />
+            <Route path="doctor/appointment/report" element={<DoctorAppointmentReport />} />
+            <Route path="request/report" element={<PharmacyOrderAnalyticsReport />} />
+            <Route path="invetory/report" element={<PharmacyInventoryAnalyticsReport />} />
+
+
+
+
+
+
           </Route>
         </Routes>
       </Router>

@@ -158,6 +158,7 @@ class Prescription(models.Model):
     diagnosis = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     notes = models.TextField(blank=True)
+    is_ordered=models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -183,6 +184,7 @@ class PharmacyRecommendation(models.Model):
     availability_score = models.DecimalField(max_digits=5, decimal_places=2)  # percentage of drugs available
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
     distance_km = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -275,10 +277,10 @@ class Order(models.Model):
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     pharmacy = models.ForeignKey(Pharmacy,on_delete=models.CASCADE,related_name='orders')
-    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='patient_orders',limit_choices_to={'user_type': 'patient'})
-    doctor = models.ForeignKey(Doctor,on_delete=models.SET_NULL,related_name='doctor_orders',null=True,blank=True,limit_choices_to={'user_type': 'doctor'} )
+    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='patient_orders')
+    doctor = models.ForeignKey(Doctor,on_delete=models.SET_NULL,related_name='doctor_orders',null=True,blank=True )
     prescription = models.ForeignKey(Prescription,on_delete=models.CASCADE,related_name='orders')
     status = models.CharField(max_length=20,choices=STATUS_CHOICES,default='pending')
     is_paid = models.BooleanField(default=False,verbose_name='Payment Status' )

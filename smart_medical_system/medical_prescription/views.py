@@ -326,6 +326,45 @@ def retrieve_pharmacy_profile(request, id):
     """
     pharmacy = get_object_or_404(Pharmacy.objects.select_related('user'), pk=id)
     return Response(PharmacySerializer(pharmacy).data)
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_doctor_profile(request):
+    """
+    Retrieve the current authenticated doctor's profile.
+    """
+    doctor = get_object_or_404(
+        Doctor.objects.select_related('user', 'hospital'),
+        user=request.user
+    )
+    return Response(DoctorSerializer(doctor).data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_patient_profile(request):
+    """
+    Retrieve the current authenticated patient's profile.
+    """
+    patient = get_object_or_404(
+        Patient.objects.select_related('user'),
+        user=request.user
+    )
+    return Response(PatientSerializer(patient).data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_current_pharmacy_profile(request):
+    """
+    Retrieve the current authenticated pharmacy's profile.
+    """
+    pharmacy = get_object_or_404(
+        Pharmacy.objects.select_related('user'),
+        user=request.user
+    )
+    return Response(PharmacySerializer(pharmacy).data)
+
 # Hospital Views
 class HospitalListCreateView(generics.ListCreateAPIView):
     queryset = Hospital.objects.filter(is_active=True)
@@ -737,8 +776,6 @@ def get_prescription_by_appointment(request, appointment_id):
         Prescription.objects.select_related('appointment', 'patient', 'doctor'),
         appointment_id=appointment_id
     )
-    print("Prescription object:", prescription)
-    print("Prescription appointment_id:", prescription.appointment_id)  # Check if this matches
 
     # 3. Serialize and print the data before returning
     serializer = PrescriptionSerializer(prescription)
@@ -998,6 +1035,8 @@ def order_list(request):
         orders = Order.objects.filter(patient=user.patient)
     elif hasattr(user, 'doctor'):
         orders = Order.objects.filter(doctor=user.doctor)
+    elif hasattr(user, 'pharmacy'):
+        orders = Order.objects.filter(pharmacy=user.pharmacy)
     else:
         # For pharmacy staff or admin - adjust as needed
         orders = Order.objects.all()
@@ -1023,13 +1062,21 @@ def order_detail(request, pk):
 def order_create(request):
     """Create a new order"""
     data = request.data.copy()
-    data['patient'] = request.user.patient.id 
-
+    data['patient'] = request.user.patient.user_id
     serializer = OrderSerializer(data=data, context={'request': request})
+
     if serializer.is_valid():
-        serializer.save()
+        order = serializer.save()  # First save the order to get the instance
+
+        # Update the prescription's is_ordered status
+        prescription = order.prescription  # Assuming your Order model has a prescription field
+        prescription.is_ordered = True
+        prescription.save()
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        print("Serializer errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PATCH'])
 @permission_classes([IsAuthenticated])

@@ -44,9 +44,7 @@ const MultiStepSignupPage = () => {
     const totalSteps = 4;
 
     const userTypes = [
-        { value: 'patient', label: 'Patient', icon: <Heart className="w-5 h-5" />, description: 'Book appointments and manage prescriptions' },
-        { value: 'doctor', label: 'Doctor', icon: <Stethoscope className="w-5 h-5" />, description: 'Provide medical care and manage patient records' },
-        { value: 'pharmacy', label: 'Pharmacy', icon: <Building2 className="w-5 h-5" />, description: 'Manage drug inventory and fulfill prescriptions' }
+        { value: 'patient', label: 'Patient', icon: <Heart className="w-5 h-5" />, description: 'Book appointments and manage prescriptions' }
     ];
     const languages = [
         { value: 'en', label: 'English' }

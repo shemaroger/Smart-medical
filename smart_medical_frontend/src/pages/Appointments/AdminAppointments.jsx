@@ -395,87 +395,97 @@ const AdminAppointments = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {paginatedAppointments.map((appointment) => (
-                                <tr key={appointment.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                                                <User className="w-5 h-5 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    {appointment.patient?.user?.first_name} {appointment.patient?.user?.last_name}
+                            {paginatedAppointments.length > 0 ? (
+                                paginatedAppointments.map((appointment) => (
+                                    <tr key={appointment.id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                                                    <User className="w-5 h-5 text-white" />
                                                 </div>
-                                                <div className="text-sm text-gray-500">
-                                                    {appointment.patient?.user?.email}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                                                <Stethoscope className="w-5 h-5 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <div className="text-sm font-medium text-gray-900">
-                                                    Dr. {appointment.doctor?.user?.first_name} {appointment.doctor?.user?.last_name}
-                                                </div>
-                                                <div className="text-sm text-gray-500">{appointment.doctor?.specialization}</div>
-                                                <div className="text-xs text-gray-400 flex items-center mt-1">
-                                                    <Building2 className="w-3 h-3 mr-1" />
-                                                    {appointment.hospital?.name}
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        {appointment.patient?.user?.first_name} {appointment.patient?.user?.last_name}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">
+                                                        {appointment.patient?.user?.email}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <div className="flex items-center">
-                                            <Calendar className="w-4 h-4 text-gray-400 mr-2" />
-                                            <div>
-                                                <div>{formatDate(appointment.appointment_date)}</div>
-                                                <div className="text-xs text-gray-500 flex items-center">
-                                                    <Clock className="w-3 h-3 mr-1" />
-                                                    {formatTime(appointment.appointment_date)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                                    <Stethoscope className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div className="ml-4">
+                                                    <div className="text-sm font-medium text-gray-900">
+                                                        Dr. {appointment.doctor?.user?.first_name} {appointment.doctor?.user?.last_name}
+                                                    </div>
+                                                    <div className="text-sm text-gray-500">{appointment.doctor?.specialization}</div>
+                                                    <div className="text-xs text-gray-400 flex items-center mt-1">
+                                                        <Building2 className="w-3 h-3 mr-1" />
+                                                        {appointment.hospital?.name}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {getStatusBadge(appointment.status)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {formatDate(appointment.created_at)}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <div className="flex items-center justify-end space-x-2">
-                                            <button
-                                                onClick={() => handleViewDetails(appointment)}
-                                                className="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
-                                                title="View Details"
-                                            >
-                                                <Eye className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => handleStatusUpdate(appointment)}
-                                                className="text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors"
-                                                title="Update Status"
-                                            >
-                                                <Edit className="w-4 h-4" />
-                                            </button>
-                                            {canCreatePrescription(appointment) && (
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div className="flex items-center">
+                                                <Calendar className="w-4 h-4 text-gray-400 mr-2" />
+                                                <div>
+                                                    <div>{formatDate(appointment.appointment_date)}</div>
+                                                    <div className="text-xs text-gray-500 flex items-center">
+                                                        <Clock className="w-3 h-3 mr-1" />
+                                                        {formatTime(appointment.appointment_date)}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {getStatusBadge(appointment.status)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {formatDate(appointment.created_at)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div className="flex items-center justify-end space-x-2">
                                                 <button
-                                                    onClick={() => handleCreatePrescription(appointment)}
-                                                    className="text-purple-600 hover:text-purple-900 p-1 rounded-lg hover:bg-purple-50 transition-colors"
-                                                    title="Create Prescription"
+                                                    onClick={() => handleViewDetails(appointment)}
+                                                    className="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
+                                                    title="View Details"
                                                 >
-                                                    <Pill className="w-4 h-4" />
+                                                    <Eye className="w-4 h-4" />
                                                 </button>
-                                            )}
-                                        </div>
+                                                <button
+                                                    onClick={() => handleStatusUpdate(appointment)}
+                                                    className="text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors"
+                                                    title="Update Status"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                                {canCreatePrescription(appointment) && (
+                                                    <button
+                                                        onClick={() => handleCreatePrescription(appointment)}
+                                                        className="text-purple-600 hover:text-purple-900 p-1 rounded-lg hover:bg-purple-50 transition-colors"
+                                                        title="Create Prescription"
+                                                    >
+                                                        <Pill className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-12 text-center">
+                                        <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No appointments found</h3>
+                                        <p className="text-gray-500">No appointments match your current filters</p>
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>

@@ -130,7 +130,6 @@ const AddUserForm = () => {
 
             if (response && response.success) {
                 toast.success('User created successfully!');
-                // Reset form
                 setFormData({
                     username: '',
                     email: '',
@@ -143,10 +142,7 @@ const AddUserForm = () => {
                     preferred_language: 'en',
                     location: ''
                 });
-                // Navigate back or to users list
-                setTimeout(() => {
-                    window.history.back(); // or use your navigation method
-                }, 1500);
+
             } else {
                 toast.error(response?.message || 'Failed to create user. Please try again.');
             }

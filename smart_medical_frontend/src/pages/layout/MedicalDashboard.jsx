@@ -61,11 +61,41 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
         {
             name: 'Dashboard Overview',
             icon: <Home className="w-5 h-5" />,
-            path: '/dashboard/overview',
+            path: '/dashboard/system/overview',
             description: 'Main Dashboard',
             badge: null,
             color: 'from-blue-500 to-blue-600',
-            roles: ['patient', 'doctor', 'pharmacy', 'admin'],
+            roles: ['admin'],
+            hasSubItems: false,
+        },
+        {
+            name: 'Dashboard Overview',
+            icon: <Home className="w-5 h-5" />,
+            path: '/dashboard/pharmacy/overview',
+            description: 'Main Dashboard',
+            badge: null,
+            color: 'from-blue-500 to-blue-600',
+            roles: ['pharmacy'],
+            hasSubItems: false,
+        },
+        {
+            name: 'Dashboard Overview',
+            icon: <Home className="w-5 h-5" />,
+            path: '/dashboard/patient/overview',
+            description: 'Main Dashboard',
+            badge: null,
+            color: 'from-blue-500 to-blue-600',
+            roles: ['patient'],
+            hasSubItems: false,
+        },
+        {
+            name: 'Dashboard Overview',
+            icon: <Home className="w-5 h-5" />,
+            path: '/dashboard/doctor/overview',
+            description: 'Main Dashboard',
+            badge: null,
+            color: 'from-blue-500 to-blue-600',
+            roles: ['doctor'],
             hasSubItems: false,
         },
         {
@@ -94,21 +124,35 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 },
                 {
                     name: 'Pending Requests',
-                    path: '/dashboard/appointments/pending',
+                    path: '/dashboard/appointments/pending/list',
                     icon: <Clock className="w-4 h-4" />,
                     description: 'Appointment requests',
                     roles: ['doctor']
-                }
+                },
+                {
+                    name: 'Appointment Report',
+                    path: '/dashboard/patient/appointment/report',
+                    icon: <Users className="w-4 h-4" />,
+                    description: 'Drugs Report',
+                    roles: ['patient']
+                },
+                {
+                    name: 'Appointment Report',
+                    path: '/dashboard/doctor/appointment/report',
+                    icon: <Users className="w-4 h-4" />,
+                    description: 'Drugs Report',
+                    roles: ['doctor']
+                },
             ]
         },
         {
             name: 'Prescriptions',
             icon: <Pill className="w-5 h-5" />,
             path: '/dashboard/prescriptions',
-            description: 'Prescription Management',
+            description: 'Prescription Analytics',
             badge: 'HOT',
             color: 'from-purple-500 to-purple-600',
-            roles: ['patient', 'doctor'],
+            roles: ['doctor'],
             hasSubItems: true,
             subItems: [
                 {
@@ -116,15 +160,9 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     path: '/dashboard/prescriptions/list',
                     icon: <List className="w-4 h-4" />,
                     description: 'View all prescriptions',
-                    roles: ['patient', 'doctor']
+                    roles: ['doctor']
                 },
-                {
-                    name: 'Pharmacy Finder',
-                    path: '/dashboard/prescriptions/pharmacy-finder',
-                    icon: <Target className="w-4 h-4" />,
-                    description: 'Find recommended pharmacies',
-                    roles: ['patient']
-                }
+
             ]
         },
         {
@@ -145,23 +183,16 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     roles: ['pharmacy']
                 },
                 {
-                    name: 'Add Drug',
-                    path: '/dashboard/inventory/add',
-                    icon: <PlusCircle className="w-4 h-4" />,
-                    description: 'Add new drug to stock',
+                    name: 'Inventory Report',
+                    path: '/dashboard/invetory/report',
+                    icon: <Users className="w-4 h-4" />,
+                    description: 'Inventory Report',
                     roles: ['pharmacy']
                 },
-                {
-                    name: 'Low Stock Alerts',
-                    path: '/dashboard/inventory/alerts',
-                    icon: <AlertCircle className="w-4 h-4" />,
-                    description: 'Stock level notifications',
-                    roles: ['pharmacy']
-                }
             ]
         },
         {
-            name: 'Payment Management',
+            name: 'Drugs Requests',
             icon: <CreditCard className="w-5 h-5" />,
             path: '/dashboard/payments',
             description: 'Financial Transactions',
@@ -171,54 +202,36 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             hasSubItems: true,
             subItems: [
                 {
-                    name: 'Payment History',
-                    path: '/dashboard/payments/history',
+                    name: 'Requests',
+                    path: '/dashboard/patients/request/list',
                     icon: <List className="w-4 h-4" />,
                     description: 'View payment records',
-                    roles: ['patient', 'pharmacy']
-                },
-                {
-                    name: 'Make Payment',
-                    path: '/dashboard/payments/make',
-                    icon: <DollarSign className="w-4 h-4" />,
-                    description: 'Process new payment',
                     roles: ['patient']
                 },
                 {
-                    name: 'Revenue Analytics',
-                    path: '/dashboard/payments/analytics',
-                    icon: <BarChart3 className="w-4 h-4" />,
-                    description: 'Financial analytics',
+                    name: 'Requests',
+                    path: '/dashboard/pharmacy/request/list',
+                    icon: <List className="w-4 h-4" />,
+                    description: 'View payment records',
                     roles: ['pharmacy']
-                }
-            ]
-        },
-        {
-            name: 'Medical Reports',
-            icon: <FileText className="w-5 h-5" />,
-            path: '/dashboard/reports',
-            description: 'Patient Records',
-            badge: null,
-            color: 'from-indigo-500 to-indigo-600',
-            roles: ['patient', 'doctor'],
-            hasSubItems: true,
-            subItems: [
-                {
-                    name: 'View Reports',
-                    path: '/dashboard/reports/list',
-                    icon: <Eye className="w-4 h-4" />,
-                    description: 'Medical report history',
-                    roles: ['patient', 'doctor']
                 },
                 {
-                    name: 'Create Report',
-                    path: '/dashboard/reports/create',
-                    icon: <PlusCircle className="w-4 h-4" />,
-                    description: 'Generate medical report',
-                    roles: ['doctor']
-                }
+                    name: 'Drugs Report',
+                    path: '/dashboard/drugs/report',
+                    icon: <Users className="w-4 h-4" />,
+                    description: 'Drugs Report',
+                    roles: ['admin']
+                },
+                {
+                    name: 'Request Report',
+                    path: '/dashboard/request/report',
+                    icon: <Users className="w-4 h-4" />,
+                    description: 'Request Report',
+                    roles: ['pharmacy']
+                },
             ]
         },
+
         {
             name: 'User Management',
             icon: <Users className="w-5 h-5" />,
@@ -236,14 +249,15 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     description: 'User management',
                     roles: ['admin']
                 },
-
                 {
-                    name: 'System Reports',
-                    path: '/dashboard/users/reports',
-                    icon: <BarChart2 className="w-4 h-4" />,
-                    description: 'System analytics',
+                    name: 'Users Report',
+                    path: '/dashboard/users/report',
+                    icon: <Users className="w-4 h-4" />,
+                    description: 'User Report',
                     roles: ['admin']
-                }
+                },
+
+
             ]
         },
         {
@@ -266,7 +280,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             ]
         },
         {
-            name: 'Drug Database',
+            name: 'Drugs Management',
             icon: <Pill className="w-5 h-5" />,
             path: '/dashboard/drugs',
             description: 'Medication Repository',
@@ -277,10 +291,17 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             subItems: [
                 {
                     name: 'Browse Drugs',
+                    path: '/dashboard/all/drugs/list',
+                    icon: <Search className="w-4 h-4" />,
+                    description: 'Search medication database',
+                    roles: ['doctor', 'pharmacy']
+                },
+                {
+                    name: 'Browse Drugs',
                     path: '/dashboard/drugs/list',
                     icon: <Search className="w-4 h-4" />,
                     description: 'Search medication database',
-                    roles: ['admin', 'doctor', 'pharmacy']
+                    roles: ['admin']
                 },
 
             ]
@@ -656,7 +677,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                             <button
                                                 onClick={() => {
                                                     setDropdownOpen(false);
-                                                    navigate('/dashboard/profile');
+                                                    navigate('/dashboard/user/profile');
                                                 }}
                                                 className="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer w-full text-left"
                                             >

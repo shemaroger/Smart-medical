@@ -72,4 +72,12 @@ urlpatterns = [
     path('orders/<uuid:pk>/', views.order_detail, name='order-detail'),
     path('orders/create/', views.order_create, name='order-create'),
     path('orders/<uuid:pk>/update-status/', views.order_update_status, name='order-update-status'),
+
+
+    path('profiles/doctor/me/', views.get_current_doctor_profile, name='current-doctor-profile'),
+    path('profiles/patient/me/', views.get_current_patient_profile, name='current-patient-profile'),
+    path('profiles/pharmacy/me/', views.get_current_pharmacy_profile, name='current-pharmacy-profile'),
+
 ]
+
+

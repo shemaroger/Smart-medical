@@ -86,17 +86,16 @@ const AppointmentPrescriptions = () => {
             return;
         }
 
-        // pick IDs safely from your selectedPrescription structure
+
         const patientId = selectedPrescription.patient.user?.id;
         const doctorId = selectedPrescription.doctor.user?.id ?? null;
 
-        // minimal payload that should satisfy your Order model / create view
         const payload = {
             pharmacy_id: recommendation.pharmacy.user?.id,
             prescription_id: selectedPrescription.id,
             patient_id: patientId,
             doctor_id: doctorId,
-            total_amount: recommendation.total_cost, // or let server compute
+            total_amount: recommendation.total_cost,
         };
 
         console.log(payload)
@@ -105,8 +104,7 @@ const AppointmentPrescriptions = () => {
             const res = await orderService.create(payload);
             if (res.success) {
                 toast.success('Order created successfully');
-                // Optional: navigate to order detail page if you have a route
-                // navigate(`/orders/${res.data.id}`);
+                initializePage();
             } else {
                 toast.error(res.error?.message || 'Failed to create order');
             }
@@ -502,29 +500,35 @@ const AppointmentPrescriptions = () => {
                                                 <p className="italic">{recommendation.pharmacy.description}</p>
                                             </div>
                                         )}
-
                                         <div className="mt-4 flex justify-end">
-                                            <button
-                                                onClick={() => handleCreateOrder(recommendation)}
-                                                disabled={
-                                                    creatingOrderId === recommendation.id ||
-                                                    selectedPrescription.status !== 'active'
-                                                }
-                                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
-                                            >
-                                                {creatingOrderId === recommendation.id ? (
-                                                    <>
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                                        Creating order...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Plus className="w-4 h-4" />
-                                                        Order from this pharmacy
-                                                    </>
-                                                )}
-                                            </button>
+                                            {!selectedPrescription.is_ordered ? (
+                                                <button
+                                                    onClick={() => handleCreateOrder(recommendation)}
+                                                    disabled={
+                                                        creatingOrderId === recommendation.id ||
+                                                        selectedPrescription.status !== 'active'
+                                                    }
+                                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    {creatingOrderId === recommendation.id ? (
+                                                        <>
+                                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                                            Creating order...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Plus className="w-4 h-4" />
+                                                            Order from this pharmacy
+                                                        </>
+                                                    )}
+                                                </button>
+                                            ) : (
+                                                <p className="px-4 py-2 text-sm font-medium text-gray-600 bg-green-200 rounded-lg">
+                                                    Order already placed ✓
+                                                </p>
+                                            )}
                                         </div>
+
 
                                     </div>
 

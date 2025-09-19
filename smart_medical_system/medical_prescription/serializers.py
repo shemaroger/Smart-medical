@@ -76,10 +76,11 @@ class HospitalSerializer(serializers.ModelSerializer):
 
 class DoctorSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    hospital= HospitalSerializer(read_only=True)
     
     class Meta:
         model = Doctor
-        fields = ['user', 'license_number', 'specialization', 'hospital', 
+        fields = ['user', 'license_number','specialization', 'hospital', 
                  'experience_years', 'is_verified']
 
 class DoctorCreateSerializer(serializers.ModelSerializer):
@@ -208,8 +209,8 @@ class PrescriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prescription
         fields = ['id', 'appointment', 'patient', 'doctor', 'diagnosis', 
-                 'status', 'notes', 'items', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'created_at', 'updated_at']
+                 'status', 'notes', 'items', 'created_at', 'updated_at','is_ordered']
+        read_only_fields = ['id', 'created_at', 'updated_at','is_ordered']
 
 class PrescriptionCreateSerializer(serializers.ModelSerializer):
     appointment_id = serializers.UUIDField()
@@ -309,18 +310,30 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         fields = ['key', 'value', 'description', 'updated_at']
         read_only_fields = ['updated_at']
 
+    
 
 class OrderSerializer(serializers.ModelSerializer):
+    # Nested serializers for full details
+    patient = PatientSerializer(read_only=True)
+    doctor = DoctorSerializer(read_only=True)
+    pharmacy = PharmacySerializer(read_only=True)
+    prescription = PrescriptionSerializer(read_only=True)
+
+    # Writable fields (for input)
+    patient_id = serializers.UUIDField(write_only=True)  # Assuming patient IDs are UUIDs
+    doctor_id = serializers.UUIDField(write_only=True)
+    pharmacy_id = serializers.UUIDField(write_only=True)
+    prescription_id = serializers.UUIDField(write_only=True)
+
+    # Legacy fields
     pharmacy_name = serializers.CharField(source='pharmacy.pharmacy_name', read_only=True)
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
-    prescription_id = serializers.CharField(source='prescription.id', read_only=True)
-
     class Meta:
         model = Order
         fields = [
             'id', 'pharmacy', 'pharmacy_name', 'patient', 'patient_name',
-            'doctor', 'doctor_name', 'prescription', 'prescription_id',
+            'doctor', 'doctor_name', 'prescription', 'prescription_id','pharmacy_id','patient_id','doctor_id',
             'status', 'is_paid', 'total_amount', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']
@@ -332,5 +345,5 @@ class OrderSerializer(serializers.ModelSerializer):
 
     def get_doctor_name(self, obj):
         if obj.doctor and hasattr(obj.doctor, 'user'):
-            return f"{obj.doctor.user.first_name} {obj.doctor.user.last_name}"
+            return f"Dr. {obj.doctor.user.first_name} {obj.doctor.user.last_name}"
         return None
