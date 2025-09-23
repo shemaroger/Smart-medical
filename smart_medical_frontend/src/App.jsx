@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
+import { appointmentService } from './api';
 import LandingPpage from './pages/Home';
 import Login from './pages/autho/Login';
 import SignUp from './pages/autho/Signup';
@@ -33,6 +35,33 @@ import DoctorAppointmentReport from './pages/Appointments/DoctorAppointmentRepor
 import PharmacyOrderAnalyticsReport from './pages/Orders/PharmacyOrderAnalyticsReport';
 import PharmacyInventoryAnalyticsReport from './pages/Pharmacy/PharmacyInventoryAnalyticsReport';
 function App() {
+
+  useEffect(() => {
+    const autoUpdateAppointmentStatus = async () => {
+      try {
+        const result = await appointmentService.autoUpdateStatuses();
+
+        if (result.success) {
+          console.log('Auto-update result:', result.data);
+
+          window.dispatchEvent(new CustomEvent('appointmentsUpdated', {
+            detail: result.data
+          }));
+        } else {
+          console.warn('Auto-update failed:', result.error);
+        }
+      } catch (error) {
+        console.error('Auto-update failed:', error);
+      }
+    };
+    autoUpdateAppointmentStatus();
+    const interval = setInterval(autoUpdateAppointmentStatus, 1 * 60 * 1000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <>
       <Router>

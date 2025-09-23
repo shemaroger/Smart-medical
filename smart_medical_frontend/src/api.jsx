@@ -92,6 +92,37 @@ const handleError = (error) => {
 // =============================================================================
 // AUTHENTICATION SERVICES
 // =============================================================================
+
+export const otpService = {
+    async verify(otp, email) {
+        try {
+            const response = await api.post('/verify-otp/', {
+                otp: otp,
+                email: email
+            });
+
+            if (response.data.data.token) {
+                localStorage.setItem('access_token', response.data.data.token);
+                localStorage.setItem('user_data', JSON.stringify(response.data.data.user));
+            }
+
+            return {
+                success: true,
+                isVerified: true,
+                message: response.data.message || "OTP verified successfully",
+                data: response.data.data
+            };
+        } catch (error) {
+            const errorMessage = handleError(error);
+            return {
+                success: false,
+                isVerified: false,
+                error: errorMessage ||
+                    (error.response?.data?.error || "OTP verification failed")
+            };
+        }
+    }
+};
 export const authService = {
     // User Registration
     async register(userData) {
@@ -284,6 +315,9 @@ export const profileService = {
 };
 
 
+
+
+
 // =============================================================================
 // HOSPITAL SERVICES
 // =============================================================================
@@ -404,6 +438,15 @@ export const appointmentService = {
             const url = queryString ? `/appointments/?${queryString}` : '/appointments/';
 
             const response = await api.get(url);
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { success: false, error: handleError(error) };
+        }
+    },
+
+    async autoUpdateStatuses() {
+        try {
+            const response = await api.post('/appointments/auto-update-status/');
             return { success: true, data: response.data };
         } catch (error) {
             return { success: false, error: handleError(error) };

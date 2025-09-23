@@ -37,8 +37,12 @@ const AdminAppointments = () => {
         pending: { color: 'yellow', icon: ClockIcon, label: 'Pending', bgColor: 'bg-yellow-100', textColor: 'text-yellow-800' },
         approved: { color: 'blue', icon: CheckCircle, label: 'Approved', bgColor: 'bg-blue-100', textColor: 'text-blue-800' },
         completed: { color: 'green', icon: CheckCircle, label: 'Completed', bgColor: 'bg-green-100', textColor: 'text-green-800' },
-        cancelled: { color: 'red', icon: XCircle, label: 'Cancelled', bgColor: 'bg-red-100', textColor: 'text-red-800' }
+        cancelled: { color: 'red', icon: XCircle, label: 'Cancelled', bgColor: 'bg-red-100', textColor: 'text-red-800' },
+        in_progress: { color: 'orange', icon: CheckCircle, label: 'in_progress', bgColor: 'bg-orange-100', textColor: 'text-orange-800' }
     };
+
+
+
 
     const statusChoices = [
         { value: 'pending', label: 'Pending' },

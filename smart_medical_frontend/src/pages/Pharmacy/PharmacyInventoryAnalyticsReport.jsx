@@ -36,7 +36,6 @@ const PharmacyInventoryAnalyticsReportPage = () => {
         { value: 'over_counter', label: 'Over The Counter' }
     ];
 
-    // Get user data and verify admin role
     const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
     const isAdmin = userData?.user_type === 'pharmacy';
 
@@ -69,7 +68,6 @@ const PharmacyInventoryAnalyticsReportPage = () => {
         }
     };
 
-    // Utility functions for stock analysis
     const isLowStock = (item) => {
         return item.quantity_available <= item.low_stock_threshold;
     };
@@ -87,7 +85,6 @@ const PharmacyInventoryAnalyticsReportPage = () => {
         return expiryDate <= today;
     };
 
-    // Data Processing
     const getFilteredInventory = () => {
         return inventory.filter(item => {
             if (filters.category !== 'all' && item.drug?.category !== filters.category) return false;

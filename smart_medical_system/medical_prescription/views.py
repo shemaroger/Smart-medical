@@ -18,6 +18,9 @@ from django.utils import timezone
 from .models import *
 from rest_framework.exceptions import ValidationError
 from .serializers import *
+import random
+import string
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +56,11 @@ def send_email_notification(recipient_email, subject, message, notification_type
     except Exception as e:
         logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
         return False
+
+def generate_otp(length=6):
+    """Generate a random OTP of given length"""
+    characters = string.digits  # Only digits for simplicity
+    return ''.join(random.choice(characters) for _ in range(length))
 
 # Authentication Views
 @api_view(['POST'])
@@ -100,32 +108,194 @@ def register_user(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_user(request):
-    """User login"""
+    """User login with OTP verification"""
     serializer = UserLoginSerializer(data=request.data)
+    
     try:
         if serializer.is_valid():
             user = serializer.validated_data['user']
             token, created = Token.objects.get_or_create(user=user)
+            
+            # Deactivate any existing active OTP for this user (for login purpose)
+            OTPVerification.objects.filter(
+                user=user, 
+                purpose='login', 
+                is_active=True
+            ).update(is_active=False)
+            
+            # Generate and store OTP in database
+            otp_code = generate_otp()
+            otp_verification = OTPVerification.objects.create(
+                user=user,
+                otp_code=otp_code,
+                purpose='login'
+            )
+            
+
+            print("User Otp",otp_code)
+            # Send OTP via email
+            subject = "Your Login OTP Code"
+            message = (
+                f"Hello {user.first_name},\n\n"
+                f"Your one-time password (OTP) for login is: {otp_code}\n\n"
+                f"This OTP is valid for 5 minutes. Please don't share it with anyone.\n\n"
+                f"If you didn't request this, please ignore this email.\n\n"
+                f"Best regards,\nMedical System Team"
+            )
+            
+            try:
+                send_email_notification(user.email, subject, message, 'otp')
+                logger.info(f"OTP sent successfully to {user.email} for user {user.id}")
+            except Exception as e:
+                logger.error(f"Failed to send OTP email to {user.email}: {str(e)}")
+                # Still return success but log the error
+                # You might want to handle this differently based on your requirements
+            
             return Response({
-                'message': 'Login successful',
-                'user': UserSerializer(user).data,
-                'token': token.key
+                'success': True,
+                'message': 'OTP sent to your email',
+                'data': {
+                    'user': UserSerializer(user).data,
+                    'token': token.key,
+                    'requires_otp': True
+                },
+                'otp_expires_in': 300  # 5 minutes in seconds
             }, status=status.HTTP_200_OK)
         else:
-            # If the serializer is not valid, return a generic error message
-            return Response(
-                {'error': 'Incorrect email or password'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({
+                'success': False,
+                'error': {'message': 'Incorrect email or password'}
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
     except ValidationError as e:
-        # Catch ValidationError and return a generic error message
-        return Response(
-            {'error': 'Incorrect email or password'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response({
+            'success': False,
+            'error': {'message': 'Incorrect email or password'}
+        }, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        logger.error(f"Unexpected error in login_user: {str(e)}")
+        return Response({
+            'success': False,
+            'error': {'message': 'An unexpected error occurred. Please try again.'}
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_otp(request):
+    """Verify OTP sent to user's email"""
+    otp_code = request.data.get('otp')
+    email = request.data.get('email')
+    
+    if not otp_code:
+        return Response({
+            'success': False,
+            'error': 'OTP is required',
+            'isVerified': False
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not email:
+        return Response({
+            'success': False,
+            'error': 'Email is required',
+            'isVerified': False
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Validate OTP format (should be 6 digits)
+    if not otp_code.isdigit() or len(otp_code) != 6:
+        return Response({
+            'success': False,
+            'error': 'OTP must be 6 digits',
+            'isVerified': False
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return Response({
+            'success': False,
+            'error': 'User not found',
+            'isVerified': False
+        }, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        # Get the most recent active OTP for this user
+        otp_verification = OTPVerification.objects.filter(
+            user=user,
+            purpose='login',
+            is_active=True,
+            is_verified=False
+        ).order_by('-created_at').first()
+        
+        if not otp_verification:
+            return Response({
+                'success': False,
+                'error': 'No active OTP found. Please request a new one.',
+                'isVerified': False
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if OTP has expired
+        if otp_verification.is_expired():
+            # Mark as inactive
+            otp_verification.is_active = False
+            otp_verification.save()
+            
+            return Response({
+                'success': False,
+                'error': 'OTP has expired. Please request a new one.',
+                'isVerified': False
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verify OTP code
+        if otp_code == otp_verification.otp_code:
+            # Mark OTP as verified and inactive
+            # otp_verification.is_verified = True
+            # otp_verification.is_active = False
+            otp_verification.verified_at = timezone.now()
+            otp_verification.save()
+            
+            # Get or create token for the user
+            token, created = Token.objects.get_or_create(user=user)
+            
+            # Optional: Clean up old expired OTPs for this user
+            OTPVerification.objects.filter(
+                user=user,
+                expires_at__lt=timezone.now()
+            ).delete()
+            
+            logger.info(f"OTP verified successfully for user {user.id}")
+            
+            return Response({
+                'success': True,
+                'message': 'OTP verified successfully',
+                'isVerified': True,
+                'data': {
+                    'user': UserSerializer(user).data,
+                    'token': token.key,
+                    'requires_otp': False  # OTP is now verified
+                }
+            }, status=status.HTTP_200_OK)
+        else:
+            logger.warning(f"Invalid OTP attempt for user {user.id}")
+            return Response({
+                'success': False,
+                'error': 'Invalid OTP. Please check and try again.',
+                'isVerified': False
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+    except Exception as e:
+        logger.error(f"Error verifying OTP for user {user.id}: {str(e)}")
+        return Response({
+            'success': False,
+            'error': 'An error occurred while verifying OTP. Please try again.',
+            'isVerified': False
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -622,6 +792,97 @@ def update_appointment_status(request, appointment_id):
         'message': f'Appointment {new_status} successfully',
         'appointment': AppointmentSerializer(appointment).data
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def auto_update_appointment_status(request):
+    """
+    Automatically update appointment status to 'in_progress' when appointment time arrives
+    This function can be called periodically or triggered manually
+    """
+    try:
+        now = timezone.now()
+        
+        # Find all approved appointments where the time has arrived (within the last hour)
+        appointments_to_update = Appointment.objects.filter(
+            status='approved',
+            appointment_date__lte=now,
+            appointment_date__gte=now - timedelta(hours=1)  # Only check recent appointments
+        )
+        
+        updated_appointments = []
+        
+        for appointment in appointments_to_update:
+            # Update status to in_progress
+            appointment.status = 'in_progress'
+            appointment.save()
+            
+            updated_appointments.append({
+                'id': appointment.id,
+                'patient': f"{appointment.patient.user.first_name} {appointment.patient.user.last_name}",
+                'doctor': f"Dr. {appointment.doctor.user.first_name} {appointment.doctor.user.last_name}",
+                'appointment_date': appointment.appointment_date,
+                'status': appointment.status
+            })
+            
+            # Send notification to patient
+            try:
+                patient_subject = "Your Appointment is Now In Progress"
+                patient_message = (
+                    f"Dear {appointment.patient.user.first_name},\n\n"
+                    f"Your appointment with Dr. {appointment.doctor.user.first_name} "
+                    f"{appointment.doctor.user.last_name} is now in progress.\n\n"
+                    f"Appointment Details:\n"
+                    f"- Date & Time: {appointment.appointment_date}\n"
+                    f"- Hospital: {appointment.hospital.name}\n"
+                    f"- Reason: {appointment.reason}\n\n"
+                    f"Please proceed to the hospital if you haven't already.\n\n"
+                    f"Best regards,\nMedical System Team"
+                )
+                
+                send_email_notification(
+                    appointment.patient.user.email, 
+                    patient_subject, 
+                    patient_message, 
+                    'appointment_in_progress'
+                )
+                
+                # Also send notification to doctor
+                doctor_subject = "Appointment Started"
+                doctor_message = (
+                    f"Dear Dr. {appointment.doctor.user.first_name},\n\n"
+                    f"Your appointment with {appointment.patient.user.first_name} "
+                    f"{appointment.patient.user.last_name} is now in progress.\n\n"
+                    f"Appointment Details:\n"
+                    f"- Date & Time: {appointment.appointment_date}\n"
+                    f"- Reason: {appointment.reason}\n\n"
+                    f"Best regards,\nMedical System Team"
+                )
+                
+                send_email_notification(
+                    appointment.doctor.user.email, 
+                    doctor_subject, 
+                    doctor_message, 
+                    'appointment_in_progress'
+                )
+                
+            except Exception as e:
+                print(f"❌ Error sending notification for appointment {appointment.id}: {str(e)}")
+        
+        return Response({
+            'message': f'Successfully updated {len(updated_appointments)} appointments to in_progress',
+            'updated_appointments': updated_appointments,
+            'total_updated': len(updated_appointments),
+            'timestamp': now
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        print(f"❌ Error in auto_update_appointment_status: {str(e)}")
+        return Response(
+            {'error': 'Failed to update appointment statuses', 'details': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 # Prescription Views
 @api_view(['POST'])

@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from decimal import Decimal
 import uuid
+from django.utils import timezone
+from datetime import timedelta
 
 class User(AbstractUser):
     USER_TYPES = (
@@ -126,6 +128,7 @@ class Appointment(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
         ('approved', 'Approved'),
+        ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     )
@@ -295,3 +298,41 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.get_status_display()} - {self.patient}"
+
+
+class OTPVerification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='otp_verifications')
+    otp_code = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, default='login')  # login, password_reset, etc.
+    is_verified = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    verified_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'otp_verification'
+        ordering = ['-created_at']
+    
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            # Set expiration to 5 minutes from creation
+            self.expires_at = timezone.now() + timedelta(minutes=5)
+        super().save(*args, **kwargs)
+    
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+    
+    def is_valid(self):
+        return self.is_active and not self.is_verified and not self.is_expired()
+    
+    @classmethod
+    def cleanup_expired(cls):
+        """Remove expired OTP records"""
+        expired_otps = cls.objects.filter(expires_at__lt=timezone.now())
+        count = expired_otps.count()
+        expired_otps.delete()
+        return count
+    
+    def __str__(self):
+        return f"OTP for {self.user.username} - {self.otp_code} ({self.purpose})"

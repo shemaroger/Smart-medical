@@ -38,8 +38,10 @@ const PatientAppointments = () => {
         pending: { color: 'yellow', icon: ClockIcon, label: 'Pending' },
         approved: { color: 'blue', icon: CheckCircle, label: 'Approved' },
         completed: { color: 'green', icon: CheckCircle, label: 'Completed' },
-        cancelled: { color: 'red', icon: XCircle, label: 'Cancelled' }
+        cancelled: { color: 'red', icon: XCircle, label: 'Cancelled' },
+        in_progress: { color: 'orange', icon: CheckCircle, label: 'in_progress' }
     };
+
 
     useEffect(() => {
         initializePage();
@@ -305,7 +307,7 @@ const PatientAppointments = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                 {Object.entries(statusConfig).map(([status, config]) => {
                     const count = appointments.filter(app => app.status === status).length;
                     return (
@@ -345,6 +347,7 @@ const PatientAppointments = () => {
                         <option value="all">All Status</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
+                        <option value="in_progress">in_progress</option>
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                     </select>

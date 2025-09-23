@@ -37,3 +37,138 @@ INFO 2025-09-18 04:10:45,599 views 18200 4424 Email sent successfully to samuel@
 INFO 2025-09-18 04:19:15,582 views 18200 14496 Email sent successfully to nadeje@gmail.com
 INFO 2025-09-18 04:20:24,397 views 18200 14496 Email sent successfully to emmy@gmail.com
 INFO 2025-09-18 04:42:55,842 views 29936 23264 Email sent successfully to samuel@gmail.com
+INFO 2025-09-23 10:49:58,413 views 4360 25172 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 10:49:58,416 views 4360 25172 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 10:52:14,184 views 4360 22896 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 10:52:14,185 views 4360 22896 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 10:58:44,004 views 7972 25212 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 10:58:44,004 views 7972 25212 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:00:59,569 views 8476 6148 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:00:59,570 views 8476 6148 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+ERROR 2025-09-23 11:01:11,042 views 8476 26140 Error verifying OTP for user None: ['“AnonymousUser” is not a valid UUID.']
+ERROR 2025-09-23 11:01:13,920 views 8476 10692 Error verifying OTP for user None: ['“AnonymousUser” is not a valid UUID.']
+INFO 2025-09-23 11:16:23,402 views 300 23832 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:16:23,404 views 300 23832 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:17:39,821 views 300 7780 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:17:39,823 views 300 7780 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+ERROR 2025-09-23 11:22:53,025 views 25888 10560 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+INFO 2025-09-23 11:23:16,355 views 25888 8540 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:23:16,356 views 25888 8540 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+ERROR 2025-09-23 11:23:25,547 views 25888 8540 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+ERROR 2025-09-23 11:23:26,848 views 25888 8540 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+ERROR 2025-09-23 11:23:27,615 views 25888 8540 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+ERROR 2025-09-23 11:23:28,208 views 25888 8540 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+ERROR 2025-09-23 11:23:28,383 views 25888 8540 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+ERROR 2025-09-23 11:23:28,588 views 25888 8540 Error verifying OTP for user 429d0341-d545-4d8a-aa25-5cd3192f97ff: Cannot resolve keyword 'crea   ted_at' into field. Choices are: created_at, expires_at, id, is_active, is_verified, otp_code, purpose, user, user_id, verified_at
+INFO 2025-09-23 11:24:04,795 views 12096 17516 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:24:49,402 views 12096 21184 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:24:49,403 views 12096 21184 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:24:59,263 views 12096 21184 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:27:11,630 views 12096 3180 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:27:11,631 views 12096 3180 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:27:22,396 views 12096 3180 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:30:18,239 views 12096 25856 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:30:18,240 views 12096 25856 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+WARNING 2025-09-23 11:30:48,414 views 12096 14004 Invalid OTP attempt for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+WARNING 2025-09-23 11:31:10,348 views 12096 18568 Invalid OTP attempt for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:31:14,403 views 12096 18568 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:32:14,494 views 12096 25672 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:34:55,651 views 24996 19228 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:35:19,534 views 24996 19228 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:35:19,536 views 24996 19228 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:35:30,041 views 24996 19228 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:40:50,585 views 19992 5692 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:40:50,586 views 19992 5692 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:42:43,138 views 23396 18492 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:43:17,188 views 23396 18320 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:43:42,770 views 23396 21584 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:43:42,771 views 23396 21584 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:43:53,424 views 23396 26152 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:45:51,743 views 23396 24064 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:45:51,755 views 23396 24064 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:46:01,433 views 23396 24064 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:47:41,957 views 23396 24064 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:52:06,767 views 23396 984 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:52:06,768 views 23396 984 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:52:33,904 views 23396 984 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:55:33,107 views 23396 25376 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:55:33,108 views 23396 25376 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:55:43,892 views 23396 25376 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:57:42,976 views 23396 25376 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 11:57:42,977 views 23396 25376 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:57:56,231 views 23396 26044 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:58:39,253 views 23396 26044 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:59:13,856 views 23396 26044 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 11:59:56,722 views 23396 5396 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:02:18,419 views 23396 13968 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:02:53,031 views 23396 18712 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 12:02:53,031 views 23396 18712 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:03:03,336 views 23396 18712 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:04:53,763 views 23396 18712 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 12:04:53,765 views 23396 18712 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:05:06,393 views 23396 18712 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:05:27,087 views 23396 18712 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:10:08,044 views 23396 19872 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 12:10:08,045 views 23396 19872 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:10:28,815 views 23396 19872 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:10:44,784 views 23396 19872 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 12:29:25,398 views 16536 26096 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 12:29:25,399 views 16536 26096 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 12:29:35,796 views 16536 26096 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 12:30:20,493 views 16536 26096 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 12:30:24,266 views 16536 26096 Email sent successfully to emmy@gmail.com
+INFO 2025-09-23 12:30:54,240 views 16536 26096 Email sent successfully to emmy@gmail.com
+INFO 2025-09-23 12:30:54,241 views 16536 26096 OTP sent successfully to emmy@gmail.com for user 2c20ace8-5343-46bc-8be8-5e4b141359ad
+INFO 2025-09-23 12:31:10,691 views 16536 26096 OTP verified successfully for user 2c20ace8-5343-46bc-8be8-5e4b141359ad
+INFO 2025-09-23 12:32:33,803 views 16536 25692 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 13:00:57,191 views 9864 23040 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 13:00:57,193 views 9864 23040 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 13:01:07,852 views 9864 23040 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 13:01:47,878 views 9864 19716 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 13:01:52,181 views 9864 19716 Email sent successfully to test@test.com
+INFO 2025-09-23 13:02:10,721 views 9864 19716 Email sent successfully to test@test.com
+INFO 2025-09-23 13:02:10,722 views 9864 19716 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 13:02:12,900 views 9864 19716 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 13:02:31,506 views 9864 4676 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 13:10:06,248 views 20568 4260 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 13:10:06,250 views 20568 4260 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 13:10:37,686 views 20568 4260 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 13:11:39,468 views 20568 13056 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 13:11:43,137 views 20568 13056 Email sent successfully to test@test.com
+INFO 2025-09-23 13:12:07,927 views 20568 13056 Email sent successfully to test@test.com
+INFO 2025-09-23 13:12:07,929 views 20568 13056 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 13:12:15,010 views 20568 13056 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 13:12:43,482 views 20568 24352 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 15:21:54,125 views 21736 19016 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 15:21:54,126 views 21736 19016 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 15:21:57,780 views 21736 10480 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 15:22:27,085 views 21736 19308 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 15:22:30,709 views 21736 19308 Email sent successfully to test@test.com
+INFO 2025-09-23 15:22:48,086 views 21736 7496 Email sent successfully to test@test.com
+INFO 2025-09-23 15:22:48,087 views 21736 7496 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 15:23:40,690 views 24064 6100 Email sent successfully to test@test.com
+INFO 2025-09-23 15:23:40,692 views 24064 6100 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 15:23:49,118 views 24064 12216 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 15:24:05,704 views 24064 7856 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 15:28:18,061 views 24064 24872 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 15:28:18,062 views 24064 24872 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 18:02:26,204 views 25092 24992 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:02:26,209 views 25092 24992 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 18:02:52,920 views 25092 24992 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2025-09-23 18:04:20,977 views 25092 24992 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:04:24,971 views 25092 24992 Email sent successfully to test@test.com
+INFO 2025-09-23 18:07:48,350 views 4876 13576 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:07:52,542 views 4876 13576 Email sent successfully to test@test.com
+INFO 2025-09-23 18:20:24,857 views 4876 21596 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:20:28,275 views 4876 21596 Email sent successfully to emmy@gmail.com
+INFO 2025-09-23 18:20:52,141 views 4876 21596 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:20:55,504 views 4876 21596 Email sent successfully to emmy@gmail.com
+INFO 2025-09-23 18:24:33,349 views 4876 14708 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:24:37,640 views 4876 14708 Email sent successfully to emmy@gmail.com
+INFO 2025-09-23 18:27:33,251 views 4876 22472 Email sent successfully to Jeanine@gmail.com
+INFO 2025-09-23 18:27:36,538 views 4876 22472 Email sent successfully to emmy@gmail.com
+INFO 2025-09-23 18:34:12,295 views 9632 19020 Email sent successfully to manishimweeric54@gmail.com
+INFO 2025-09-23 18:34:12,296 views 9632 19020 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2025-09-23 18:34:44,841 views 9632 25280 Email sent successfully to test@test.com
+INFO 2025-09-23 18:34:44,842 views 9632 25280 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-09-23 18:34:54,959 views 9632 25280 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33

@@ -37,7 +37,7 @@ urlpatterns = [
     path('prescriptions/<uuid:prescription_id>/recommendations/', views.get_pharmacy_recommendations, name='get_pharmacy_recommendations'),
     path('prescriptions/<uuid:prescription_id>/', views.get_prescription_by_id, name='prescription-detail'),
     path('prescriptions/by-appointment/<uuid:appointment_id>/', views.get_prescription_by_appointment, name='prescription-by-appointment'),
-
+    path('appointments/auto-update-status/', views.auto_update_appointment_status, name='auto_update_appointment_status'),
     
     # Payment URLs
     path('payments/create/', views.create_payment, name='create_payment'),
@@ -77,7 +77,9 @@ urlpatterns = [
     path('profiles/doctor/me/', views.get_current_doctor_profile, name='current-doctor-profile'),
     path('profiles/patient/me/', views.get_current_patient_profile, name='current-patient-profile'),
     path('profiles/pharmacy/me/', views.get_current_pharmacy_profile, name='current-pharmacy-profile'),
+    path('auto-update-status/', views.auto_update_appointment_status, name='auto_update_appointment_status'),
 
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
 ]
 
 
