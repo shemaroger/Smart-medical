@@ -104,7 +104,7 @@ const LandingPage = () => {
                 "Track your medical history",
                 "Secure online payments"
             ],
-            color: "from-blue-500 to-cyan-500"
+            color: "from-green-500 to-emerald-500"
         },
         {
             icon: <UserCheck className="w-12 h-12" />,
@@ -116,7 +116,7 @@ const LandingPage = () => {
                 "Generate medical reports",
                 "Real-time communication with patients"
             ],
-            color: "from-green-500 to-emerald-500"
+            color: "from-teal-500 to-green-600"
         },
         {
             icon: <Building2 className="w-12 h-12" />,
@@ -128,7 +128,7 @@ const LandingPage = () => {
                 "Revenue tracking and analytics",
                 "Customer payment integration"
             ],
-            color: "from-purple-500 to-violet-500"
+            color: "from-emerald-500 to-green-700"
         }
     ];
 
@@ -140,28 +140,31 @@ const LandingPage = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center py-4">
                         <div className="flex items-center space-x-2">
-                            <div className="bg-blue-600 p-2 rounded-lg">
-                                <Stethoscope className="w-6 h-6 text-white" />
-                            </div>
-                            <span className={`text-xl font-bold ${isScrolled ? 'text-gray-900' : 'text-white'}`}>
+                            <img
+                                src="/public/Images/smartlogo .jpg"
+                                alt="Smart Medical Logo"
+                                className="w-24 h-10 rounded-full"
+                            />
+                            <span className={`text-xl font-bold ${isScrolled ? 'text-green-900' : 'text-white'}`}>
                                 Smart Medical
                             </span>
                         </div>
 
+
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center space-x-8">
-                            <a href="#features" className={`hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
+                            <a href="#features" className={`hover:text-green-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
                                 }`}>Features</a>
-                            <a href="#about" className={`hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
+                            <a href="#about" className={`hover:text-green-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
                                 }`}>About</a>
-                            <a href="#testimonials" className={`hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
+                            <a href="#testimonials" className={`hover:text-green-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
                                 }`}>Reviews</a>
-                            <a href="#contact" className={`hover:text-blue-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
+                            <a href="#contact" className={`hover:text-green-600 transition-colors ${isScrolled ? 'text-gray-700' : 'text-white'
                                 }`}>Contact</a>
-                            <a href='/login' className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                            <a href='/login' className="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800 transition-colors">
                                 Sign In
                             </a>
-                            <a href='/signup' className="border border-blue-600 text-blue-600 px-6 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors">
+                            <a href='/signup' className="border border-green-700 text-green-700 px-6 py-2 rounded-lg hover:bg-green-700 hover:text-white transition-colors">
                                 Register
                             </a>
                         </div>
@@ -183,15 +186,15 @@ const LandingPage = () => {
                     {isMenuOpen && (
                         <div className="md:hidden bg-white border-t">
                             <div className="px-2 pt-2 pb-3 space-y-1">
-                                <a href="#features" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Features</a>
-                                <a href="#about" className="block px-3 py-2 text-gray-700 hover:text-blue-600">About</a>
-                                <a href="#testimonials" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Reviews</a>
-                                <a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-blue-600">Contact</a>
+                                <a href="#features" className="block px-3 py-2 text-gray-700 hover:text-green-600">Features</a>
+                                <a href="#about" className="block px-3 py-2 text-gray-700 hover:text-green-600">About</a>
+                                <a href="#testimonials" className="block px-3 py-2 text-gray-700 hover:text-green-600">Reviews</a>
+                                <a href="#contact" className="block px-3 py-2 text-gray-700 hover:text-green-600">Contact</a>
                                 <div className="flex flex-col space-y-2 px-3 py-2">
-                                    <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                    <button className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition-colors">
                                         Sign In
                                     </button>
-                                    <button className="border border-blue-600 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-600 hover:text-white transition-colors">
+                                    <button className="border border-green-700 text-green-700 px-4 py-2 rounded-lg hover:bg-green-700 hover:text-white transition-colors">
                                         Register
                                     </button>
                                 </div>
@@ -202,39 +205,39 @@ const LandingPage = () => {
             </nav>
 
             {/* Hero Section */}
-            <section className="relative min-h-screen flex items-center bg-gradient-to-br from-blue-900 via-blue-800 to-cyan-700">
+            <section className="relative min-h-screen flex items-center bg-gradient-to-br from-green-900 via-green-900 to-emerald-900">
                 <div className="absolute inset-0 bg-black opacity-20"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div className="text-white">
                             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
                                 Revolutionizing
-                                <span className="text-cyan-400"> Healthcare</span>
+                                <span className="text-emerald-300"> Healthcare</span>
                                 <br />Management
                             </h1>
-                            <p className="text-xl md:text-2xl mb-8 text-blue-100">
+                            <p className="text-xl md:text-2xl mb-8 text-green-100">
                                 Connect patients, doctors, and pharmacies through our intelligent prescription management platform.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                                <button className="bg-cyan-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-cyan-600 transition-colors flex items-center justify-center">
+                                <button className="bg-emerald-500 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-emerald-600 transition-colors flex items-center justify-center">
                                     Get Started Today
                                     <ArrowRight className="ml-2 w-5 h-5" />
                                 </button>
-                                <button className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-900 transition-colors">
+                                <button className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-900 transition-colors">
                                     Watch Demo
                                 </button>
                             </div>
-                            <div className="flex items-center space-x-6 text-blue-100">
+                            <div className="flex items-center space-x-6 text-green-100">
                                 <div className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-cyan-400 mr-2" />
+                                    <CheckCircle className="w-5 h-5 text-emerald-400 mr-2" />
                                     <span>HIPAA Compliant</span>
                                 </div>
                                 <div className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-cyan-400 mr-2" />
+                                    <CheckCircle className="w-5 h-5 text-emerald-400 mr-2" />
                                     <span>24/7 Support</span>
                                 </div>
                                 <div className="flex items-center">
-                                    <CheckCircle className="w-5 h-5 text-cyan-400 mr-2" />
+                                    <CheckCircle className="w-5 h-5 text-emerald-400 mr-2" />
                                     <span>Mobile Ready</span>
                                 </div>
                             </div>
@@ -248,22 +251,22 @@ const LandingPage = () => {
                                         <p className="text-gray-600">Choose your user type to get started</p>
                                     </div>
                                     <div className="space-y-4">
-                                        <button className="w-full bg-blue-50 border-2 border-blue-200 p-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center">
-                                            <Heart className="w-6 h-6 text-blue-600 mr-3" />
+                                        <button className="w-full bg-green-50 border-2 border-green-200 p-4 rounded-lg hover:bg-green-100 transition-colors flex items-center">
+                                            <Heart className="w-6 h-6 text-green-700 mr-3" />
                                             <div className="text-left">
                                                 <div className="font-semibold text-gray-900">Patient Portal</div>
                                                 <div className="text-sm text-gray-600">Book appointments & manage prescriptions</div>
                                             </div>
                                         </button>
-                                        <button className="w-full bg-green-50 border-2 border-green-200 p-4 rounded-lg hover:bg-green-100 transition-colors flex items-center">
-                                            <UserCheck className="w-6 h-6 text-green-600 mr-3" />
+                                        <button className="w-full bg-emerald-50 border-2 border-emerald-200 p-4 rounded-lg hover:bg-emerald-100 transition-colors flex items-center">
+                                            <UserCheck className="w-6 h-6 text-emerald-700 mr-3" />
                                             <div className="text-left">
                                                 <div className="font-semibold text-gray-900">Doctor Dashboard</div>
                                                 <div className="text-sm text-gray-600">Manage patients & create prescriptions</div>
                                             </div>
                                         </button>
-                                        <button className="w-full bg-purple-50 border-2 border-purple-200 p-4 rounded-lg hover:bg-purple-100 transition-colors flex items-center">
-                                            <Building2 className="w-6 h-6 text-purple-600 mr-3" />
+                                        <button className="w-full bg-teal-50 border-2 border-teal-200 p-4 rounded-lg hover:bg-teal-100 transition-colors flex items-center">
+                                            <Building2 className="w-6 h-6 text-teal-700 mr-3" />
                                             <div className="text-left">
                                                 <div className="font-semibold text-gray-900">Pharmacy System</div>
                                                 <div className="text-sm text-gray-600">Inventory management & processing</div>
@@ -283,7 +286,7 @@ const LandingPage = () => {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, index) => (
                             <div key={index} className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">{stat.number}</div>
+                                <div className="text-3xl md:text-4xl font-bold text-green-700 mb-2">{stat.number}</div>
                                 <div className="text-gray-600 font-medium">{stat.label}</div>
                             </div>
                         ))}
@@ -307,7 +310,7 @@ const LandingPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {features.map((feature, index) => (
                             <div key={index} className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-lg transition-shadow">
-                                <div className="bg-blue-100 w-16 h-16 rounded-lg flex items-center justify-center text-blue-600 mb-4">
+                                <div className="bg-green-100 w-16 h-16 rounded-lg flex items-center justify-center text-green-700 mb-4">
                                     {feature.icon}
                                 </div>
                                 <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
@@ -388,24 +391,24 @@ const LandingPage = () => {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 bg-gradient-to-r from-blue-600 to-cyan-600">
+            <section className="py-20 bg-gradient-to-r from-green-700 to-emerald-600">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-4xl font-bold text-white mb-6">
                         Ready to Transform Your Healthcare Experience?
                     </h2>
-                    <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+                    <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
                         Join thousands of healthcare professionals and patients who are already using
                         Smart Medical to streamline their healthcare management.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <button className="bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
+                        <button className="bg-white text-green-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors">
                             Start Free Trial
                         </button>
-                        <button className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">
+                        <button className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white hover:text-green-700 transition-colors">
                             Schedule Demo
                         </button>
                     </div>
-                    <div className="mt-8 flex items-center justify-center space-x-6 text-blue-100">
+                    <div className="mt-8 flex items-center justify-center space-x-6 text-green-100">
                         <div className="flex items-center">
                             <Smartphone className="w-5 h-5 mr-2" />
                             <span>Mobile App Available</span>
@@ -424,7 +427,7 @@ const LandingPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                         <div className="col-span-1 md:col-span-2">
                             <div className="flex items-center space-x-2 mb-6">
-                                <div className="bg-blue-600 p-2 rounded-lg">
+                                <div className="bg-green-700 p-2 rounded-lg">
                                     <Stethoscope className="w-6 h-6 text-white" />
                                 </div>
                                 <span className="text-xl font-bold">Smart Medical</span>

@@ -384,9 +384,11 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 <div className="flex items-center justify-center h-40 px-6 border-b border-blue-700 bg-gradient-to-r from-blue-800 to-blue-900">
                     <div className="flex items-center text-white justify-center">
                         <div className="relative group">
-                            <div className="bg-white p-3 rounded-xl">
-                                <Stethoscope className="w-10 h-10 text-blue-600" />
-                            </div>
+                            <img
+                                src="/public/Images/smartlogo .jpg"
+                                alt="Smart Medical Logo"
+                                className="w-28 h-14 rounded-full"
+                            />
                         </div>
                         <div className="ml-3">
                             <h1 className="text-xl font-bold text-white">Smart Medical</h1>

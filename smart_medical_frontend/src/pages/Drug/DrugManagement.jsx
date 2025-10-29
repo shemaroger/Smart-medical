@@ -19,7 +19,7 @@ const DrugManagement = () => {
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [prescriptionFilter, setPrescriptionFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
-    const [drugsPerPage] = useState(12);
+    const [drugsPerPage] = useState(15);
     const [userData, setUserData] = useState(null);
 
     const [createFormData, setCreateFormData] = useState({
@@ -359,59 +359,15 @@ const DrugManagement = () => {
                         <Plus className="w-4 h-4 mr-2" />
                         Add Drug
                     </button>
+                    <a href='/dashboard/drugs/add-new'
+                        className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Bulk Import
+                    </a>
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-lg bg-blue-100">
-                            <Package className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Total Drugs</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-lg bg-purple-100">
-                            <Shield className="w-6 h-6 text-purple-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Prescription</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.prescription}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-lg bg-green-100">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Over Counter</p>
-                            <p className="text-2xl font-bold text-gray-900">{stats.overCounter}</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                    <div className="flex items-center">
-                        <div className="p-3 rounded-lg bg-yellow-100">
-                            <Factory className="w-6 h-6 text-yellow-600" />
-                        </div>
-                        <div className="ml-4">
-                            <p className="text-sm font-medium text-gray-600">Categories</p>
-                            <p className="text-2xl font-bold text-gray-900">{drugCategories.length}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             {/* Filters */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -455,86 +411,110 @@ const DrugManagement = () => {
                 </div>
             </div>
 
-            {/* Drugs Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {paginatedDrugs.map((drug) => (
-                    <div key={drug.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-                        <div className="p-6">
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                    <Pill className="w-6 h-6 text-white" />
-                                </div>
-                                <div className="flex space-x-1">
-                                    <button
-                                        onClick={() => handleViewDetails(drug)}
-                                        className="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
-                                        title="View Details"
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                    </button>
-                                    <button
-                                        onClick={() => handleEditDrug(drug)}
-                                        className="text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors"
-                                        title="Edit Drug"
-                                    >
-                                        <Edit className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <div>
-                                    <h3 className="font-semibold text-gray-900 truncate" title={drug.name}>
-                                        {drug.name}
-                                    </h3>
-                                    <p className="text-sm text-gray-500 truncate" title={drug.generic_name}>
-                                        {drug.generic_name}
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    {getCategoryBadge(drug.category)}
-                                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${drug.requires_prescription
-                                        ? 'bg-red-100 text-red-800'
-                                        : 'bg-green-100 text-green-800'}`}>
+            {/* Drugs Table/List */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Drug Name
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Generic Name
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Category
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Dosage Form
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Manufacturer
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Type
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                            {paginatedDrugs.map((drug) => (
+                                <tr key={drug.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="flex items-center">
+                                            <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                                                <Pill className="w-5 h-5 text-white" />
+                                            </div>
+                                            <div className="ml-4">
+                                                <div className="text-sm font-medium text-gray-900">{drug.name}</div>
+                                                <div className="text-xs text-gray-500">ID: {drug.id}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">{drug.generic_name}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        {getCategoryBadge(drug.category)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">{drug.dosage_form}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="text-sm text-gray-900">{drug.manufacturer}</div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         {drug.requires_prescription ? (
-                                            <>
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                                                 <Shield className="w-3 h-3 mr-1" />
                                                 Rx
-                                            </>
+                                            </span>
                                         ) : (
-                                            <>
+                                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 <CheckCircle className="w-3 h-3 mr-1" />
                                                 OTC
-                                            </>
+                                            </span>
                                         )}
-                                    </span>
-                                </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={() => handleViewDetails(drug)}
+                                                className="text-blue-600 hover:text-blue-900 p-1 rounded-lg hover:bg-blue-50 transition-colors"
+                                                title="View Details"
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleEditDrug(drug)}
+                                                className="text-green-600 hover:text-green-900 p-1 rounded-lg hover:bg-green-50 transition-colors"
+                                                title="Edit Drug"
+                                            >
+                                                <Edit className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
-                                <div className="space-y-2">
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <Package className="w-4 h-4 mr-2" />
-                                        <span className="truncate">{drug.dosage_form}</span>
-                                    </div>
-                                    <div className="flex items-center text-sm text-gray-600">
-                                        <Factory className="w-4 h-4 mr-2" />
-                                        <span className="truncate" title={drug.manufacturer}>{drug.manufacturer}</span>
-                                    </div>
-                                </div>
-
-                                <p className="text-sm text-gray-600 line-clamp-2" title={drug.description}>
-                                    {drug.description}
-                                </p>
-
-                                <div className="pt-2 border-t border-gray-100">
-                                    <p className="text-xs text-gray-400">
-                                        Added {formatDate(drug.created_at)}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                {/* Empty State */}
+                {paginatedDrugs.length === 0 && (
+                    <div className="text-center py-12">
+                        <Pill className="mx-auto h-12 w-12 text-gray-400" />
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No drugs found</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                            {searchTerm || categoryFilter !== 'all' || prescriptionFilter !== 'all'
+                                ? 'Try adjusting your filters'
+                                : 'Get started by adding a new drug'}
+                        </p>
                     </div>
-                ))}
+                )}
             </div>
 
             {/* Pagination */}
@@ -742,7 +722,7 @@ const DrugManagement = () => {
                 </div>
             )}
 
-            {/* Edit Drug Modal */}
+            {/* Edit Drug Modal - Same as Create Modal but with Edit Form Data */}
             {showEditModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">

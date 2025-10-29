@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { appointmentService, getCurrentUser } from '../../api';
-
 const AdminAppointments = () => {
     const [appointments, setAppointments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -272,7 +271,7 @@ const AdminAppointments = () => {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Appointment Management</h1>

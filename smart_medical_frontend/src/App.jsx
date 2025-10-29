@@ -34,6 +34,7 @@ import AppointmentAnalyticsReport from './pages/Appointments/AppointmentAnalytic
 import DoctorAppointmentReport from './pages/Appointments/DoctorAppointmentReport';
 import PharmacyOrderAnalyticsReport from './pages/Orders/PharmacyOrderAnalyticsReport';
 import PharmacyInventoryAnalyticsReport from './pages/Pharmacy/PharmacyInventoryAnalyticsReport';
+import DrugBulkImport from './pages/Drug/DrugBulkImport';
 function App() {
 
   useEffect(() => {
@@ -78,6 +79,7 @@ function App() {
             <Route path="patient/overview" element={<PatientDashboard />}></Route>
             <Route path="doctor/overview" element={<DoctorDashboard />}></Route>
             <Route path="pharmacy/overview" element={<PharmacyDashboard />}></Route>
+            <Route path="drugs/add-new" element={<DrugBulkImport />}></Route>
 
             <Route path="users/list" element={<UsersManagement />}></Route>
             <Route path="providers/manage" element={<HospitalManagement />}></Route>

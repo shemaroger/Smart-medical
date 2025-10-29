@@ -24,12 +24,10 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor to handle errors
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         if (error.response?.status === 401) {
-            // Clear all auth data and redirect to login
             localStorage.removeItem('access_token');
             localStorage.removeItem('user_data');
             window.location.href = '/login';
@@ -38,7 +36,6 @@ api.interceptors.response.use(
     }
 );
 
-// Error handler utility
 const handleError = (error) => {
     if (error.response) {
         const { status, data } = error.response;
