@@ -105,11 +105,6 @@ function App() {
             <Route path="request/report" element={<PharmacyOrderAnalyticsReport />} />
             <Route path="invetory/report" element={<PharmacyInventoryAnalyticsReport />} />
 
-
-
-
-
-
           </Route>
         </Routes>
       </Router>

@@ -47,7 +47,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // Filter states
     const [filters, setFilters] = useState({
         status: 'all',
         paymentStatus: 'all',
@@ -66,7 +65,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
         { value: 'cancelled', label: 'Cancelled' }
     ];
 
-    // Get user data and verify admin role
     const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
     const isAdmin = userData?.user_type === 'pharmacy';
 
@@ -98,8 +96,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
             setLoading(false);
         }
     };
-
-    // Data Processing
     const getFilteredOrders = () => {
         return orders.filter(order => {
             if (filters.status !== 'all' && order.status !== filters.status) return false;
@@ -158,39 +154,25 @@ const PharmacyOrderAnalyticsReportPage = () => {
             cancelledOrders: filteredOrders.filter(o => o.status === 'cancelled').length,
             paidOrders: filteredOrders.filter(o => o.is_paid).length,
             unpaidOrders: filteredOrders.filter(o => !o.is_paid).length,
-
-            // Financial metrics
             totalRevenue: 0,
             averageOrderValue: 0,
             paidRevenue: 0,
             pendingRevenue: 0,
-
-            // Time trends
             thisMonth: 0,
             lastMonth: 0,
             thisYear: 0,
-
-            // Pharmacy diversity
             totalPharmacies: 0,
-
-            // Patient diversity
             totalPatients: 0,
-
-            // Success rate
             completionRate: 0,
-
-            // Payment rate
             paymentRate: 0
         };
 
         if (filteredOrders.length > 0) {
-            // Financial calculations
             stats.totalRevenue = filteredOrders.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
             stats.averageOrderValue = stats.totalRevenue / stats.totalOrders;
             stats.paidRevenue = filteredOrders.filter(o => o.is_paid).reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0);
             stats.pendingRevenue = stats.totalRevenue - stats.paidRevenue;
 
-            // Time trends
             const now = new Date();
             const thisMonth = now.getMonth();
             const thisYear = now.getFullYear();
@@ -211,26 +193,17 @@ const PharmacyOrderAnalyticsReportPage = () => {
                 const orderDate = new Date(o.created_at);
                 return orderDate.getFullYear() === thisYear;
             }).length;
-
-            // Pharmacy diversity
             const uniquePharmacies = new Set(filteredOrders.map(o => o.pharmacy?.id).filter(Boolean));
             stats.totalPharmacies = uniquePharmacies.size;
-
-            // Patient diversity
             const uniquePatients = new Set(filteredOrders.map(o => o.patient?.id).filter(Boolean));
             stats.totalPatients = uniquePatients.size;
-
-            // Completion rate
             stats.completionRate = (stats.completedOrders / stats.totalOrders) * 100;
-
-            // Payment rate
             stats.paymentRate = (stats.paidOrders / stats.totalOrders) * 100;
         }
 
         return stats;
     };
 
-    // Get unique pharmacies for filter
     const getUniquePharmacies = () => {
         const pharmacies = [...new Set(orders.map(o => ({
             id: o.pharmacy?.id,
@@ -239,7 +212,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
         return pharmacies.sort((a, b) => a.name.localeCompare(b.name));
     };
 
-    // Utility Functions
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
         try {
@@ -517,12 +489,9 @@ const PharmacyOrderAnalyticsReportPage = () => {
         }, 500);
     };
 
-    // Computed Values
     const filteredOrders = getFilteredOrders();
     const stats = calculateStats();
     const uniquePharmacies = getUniquePharmacies();
-
-    // Show loading state while data is being fetched
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -533,8 +502,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
             </div>
         );
     }
-
-    // Show access denied if not admin
     if (!isAdmin) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -557,7 +524,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
 
     return (
         <div className="min-h-screen bg-white">
-            {/* Header */}
             <div className="bg-gray-100 border-b-2 border-black">
                 <div className="max-w-7xl mx-auto px-6 py-6">
                     <div className="flex items-center justify-between">
@@ -593,7 +559,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-6">
-                {/* Filters Section */}
                 <div className="bg-gray-50 border-2 border-black mb-6">
                     <div className="p-6 border-b border-black">
                         <div className="flex items-center justify-between mb-4">
@@ -691,15 +656,12 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* Analytics Summary Report */}
                 <div className="bg-gray-50 border-2 border-black p-6">
                     <div className="border-b border-black pb-4 mb-6">
                         <h3 className="text-lg font-bold text-black uppercase">Pharmacy Order Analytics Summary</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                        {/* Order Overview */}
                         <div className="bg-white border border-black p-4">
                             <h4 className="font-bold text-black mb-3 uppercase flex items-center">
                                 <Package className="w-4 h-4 mr-2" />
@@ -724,8 +686,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Revenue Analytics */}
                         <div className="bg-white border border-black p-4">
                             <h4 className="font-bold text-black mb-3 uppercase flex items-center">
                                 <DollarSign className="w-4 h-4 mr-2" />
@@ -750,8 +710,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Business Metrics */}
                         <div className="bg-white border border-black p-4">
                             <h4 className="font-bold text-black mb-3 uppercase flex items-center">
                                 <Building2 className="w-4 h-4 mr-2" />
@@ -778,7 +736,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         </div>
                     </div>
 
-                    {/* Order Status Distribution Chart */}
                     <div className="bg-white border border-black p-4 mb-6">
                         <h4 className="font-bold text-black mb-4 uppercase">Order Status Distribution</h4>
                         <div className="grid grid-cols-4 gap-4">
@@ -813,7 +770,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         </div>
                     </div>
 
-                    {/* Payment Analytics */}
                     <div className="bg-white border border-black p-4 mb-6">
                         <h4 className="font-bold text-black mb-4 uppercase">Payment Analytics</h4>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -837,8 +793,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Monthly Trend Analysis */}
                     <div className="bg-white border border-black p-4 mb-6">
                         <h4 className="font-bold text-black mb-4 uppercase">Monthly Trend Analysis</h4>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -868,8 +822,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                             </div>
                         </div>
                     </div>
-
-                    {/* Financial Performance */}
                     <div className="bg-white border border-black p-4 mb-6">
                         <h4 className="font-bold text-black mb-4 uppercase">Financial Performance</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
