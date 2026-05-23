@@ -171,15 +171,27 @@ class Prescription(models.Model):
 class PrescriptionItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='items')
-    drug = models.ForeignKey(Drug, on_delete=models.CASCADE)
+    drug = models.ForeignKey(Drug, on_delete=models.SET_NULL, null=True, blank=True)
+    drug_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="Drug Name")    
     quantity = models.PositiveIntegerField()
-    dosage = models.CharField(max_length=255)  # "2 tablets twice daily"
-    duration = models.CharField(max_length=100)  # "7 days"
+    dosage = models.CharField(max_length=255)  
+    duration = models.CharField(max_length=100) 
     instructions = models.TextField(blank=True)
 
-    def __str__(self):
-        return f"{self.drug.name} - {self.quantity} units"
+    def save(self, *args, **kwargs):
+        # Only try to access drug.name if drug exists
+        if self.drug is not None:  # Check if drug is not None
+            if not self.drug_name:
+                self.drug_name = self.drug.name
+        super().save(*args, **kwargs)
 
+    def __str__(self):
+        # Handle case where drug is None
+        if self.drug is not None:
+            return f"{self.drug.name} - {self.quantity} units"
+        return f"{self.drug_name or 'Unknown Drug'} - {self.quantity} units"
+    
+    
 class PharmacyRecommendation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='recommendations')

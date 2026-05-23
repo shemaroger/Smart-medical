@@ -803,18 +803,16 @@ def auto_update_appointment_status(request):
     """
     try:
         now = timezone.now()
-        
-        # Find all approved appointments where the time has arrived (within the last hour)
+    
         appointments_to_update = Appointment.objects.filter(
             status='approved',
             appointment_date__lte=now,
-            appointment_date__gte=now - timedelta(hours=1)  # Only check recent appointments
+            appointment_date__gte=now - timedelta(hours=1) 
         )
         
         updated_appointments = []
         
         for appointment in appointments_to_update:
-            # Update status to in_progress
             appointment.status = 'in_progress'
             appointment.save()
             
@@ -825,8 +823,7 @@ def auto_update_appointment_status(request):
                 'appointment_date': appointment.appointment_date,
                 'status': appointment.status
             })
-            
-            # Send notification to patient
+        
             try:
                 patient_subject = "Your Appointment is Now In Progress"
                 patient_message = (
@@ -901,19 +898,33 @@ def create_prescription(request):
             with transaction.atomic():
                 prescription = serializer.save()
                 
-                # Update appointment status to completed
+                # Update appointment status
                 appointment = prescription.appointment
                 appointment.status = 'completed'
                 appointment.save()
                 
-                # Generate pharmacy recommendations
-                generate_pharmacy_recommendations(prescription)
+                # Generate pharmacy recommendations (COMMENT THIS OUT FOR TESTING)
+                # generate_pharmacy_recommendations(prescription)
                 
                 # Send notification to patient
                 subject = "Prescription Ready"
                 message = f"Dear {prescription.patient.user.first_name},\n\nYour prescription is ready.\n\nDiagnosis: {prescription.diagnosis}\n\nPrescribed Medications:\n"
+                
+                # DEBUG: Print each item to see what's happening
                 for item in prescription.items.all():
-                    message += f"- {item.drug.name}: {item.quantity} units, {item.dosage}, for {item.duration}\n"
+                    print(f"Item ID: {item.id}")
+                    print(f"Item drug: {item.drug}")
+                    print(f"Item drug_name: {item.drug_name}")
+                    print(f"Item quantity: {item.quantity}")
+                    
+                    # SAFE way to get drug display name
+                    if item.drug is not None:
+                        drug_display = item.drug.name
+                    else:
+                        drug_display = item.drug_name or 'Unknown Drug'
+                    
+                    message += f"- {drug_display}: {item.quantity} units, {item.dosage}, for {item.duration}\n"
+                
                 message += f"\nNotes: {prescription.notes}\n\nRecommended pharmacies will be sent separately.\n\nBest regards,\nMedical System Team"
                 
                 send_email_notification(
@@ -927,19 +938,19 @@ def create_prescription(request):
                 
         except Exception as e:
             logger.error(f"Prescription creation error: {str(e)}")
-            print(f"Prescription creation error: {str(e)}")  # 👈 print in console
+            print(f"Prescription creation error: {str(e)}")
+            import traceback
+            traceback.print_exc()  # This will show the full error traceback
             return Response(
-                {'error': 'Failed to create prescription'},
+                {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
     else:
-        # 👇 Only print serializer errors, don’t include in API response
         print("Prescription validation errors:", serializer.errors)
         return Response(
-            {'error': 'Invalid prescription data'},
+            serializer.errors,
             status=status.HTTP_400_BAD_REQUEST
         )
-
 def generate_pharmacy_recommendations(prescription):
     """Generate pharmacy recommendations based on drug availability"""
     try:

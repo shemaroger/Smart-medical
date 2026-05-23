@@ -172,3 +172,69 @@ INFO 2025-09-23 18:34:12,296 views 9632 19020 OTP sent successfully to manishimw
 INFO 2025-09-23 18:34:44,841 views 9632 25280 Email sent successfully to test@test.com
 INFO 2025-09-23 18:34:44,842 views 9632 25280 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
 INFO 2025-09-23 18:34:54,959 views 9632 25280 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2025-10-29 15:58:33,807 views 19136 25364 Email sent successfully to admin@admin.com
+INFO 2025-10-29 15:58:33,807 views 19136 25364 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2025-10-29 15:58:50,903 views 19136 15472 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2025-10-29 22:13:20,647 views 26152 2332 Email sent successfully to admin@admin.com
+INFO 2025-10-29 22:13:20,654 views 26152 2332 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2025-10-29 22:13:29,510 views 26152 23528 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:28:18,903 views 6254 131140529682112 Email sent successfully to admin@admin.com
+INFO 2026-05-23 10:28:18,903 views 6254 131140529682112 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:29:17,081 views 6544 125879898339008 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:45:49,699 views 6544 125879889946304 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-23 10:45:49,700 views 6544 125879889946304 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-23 10:46:02,585 views 6544 125879889946304 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-23 10:49:32,525 views 6544 125879881553600 Email sent successfully to admin@admin.com
+INFO 2026-05-23 10:49:32,526 views 6544 125879881553600 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:49:39,796 views 6544 125879881553600 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:50:19,219 views 6544 125879889946304 Email sent successfully to phamacy@gmail.com
+INFO 2026-05-23 10:50:19,219 views 6544 125879889946304 OTP sent successfully to phamacy@gmail.com for user ea5439fe-3258-430a-bd43-584f719c7875
+INFO 2026-05-23 10:50:25,649 views 6544 125879889946304 OTP verified successfully for user ea5439fe-3258-430a-bd43-584f719c7875
+INFO 2026-05-23 10:55:14,868 views 6544 125879518754496 Email sent successfully to admin@admin.com
+INFO 2026-05-23 10:55:14,868 views 6544 125879518754496 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:55:20,229 views 6544 125879518754496 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 10:57:40,162 views 6544 125879518754496 Email sent successfully to phamacy@gmail.com
+INFO 2026-05-23 10:57:40,162 views 6544 125879518754496 OTP sent successfully to phamacy@gmail.com for user ea5439fe-3258-430a-bd43-584f719c7875
+INFO 2026-05-23 10:57:44,315 views 6544 125879518754496 OTP verified successfully for user ea5439fe-3258-430a-bd43-584f719c7875
+INFO 2026-05-23 12:04:46,172 views 6544 125879889946304 Email sent successfully to admin@admin.com
+INFO 2026-05-23 12:04:46,173 views 6544 125879889946304 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 12:05:04,825 views 6544 125879889946304 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-23 12:08:25,310 views 6544 125879898339008 Email sent successfully to test@test.com
+INFO 2026-05-23 12:08:25,310 views 6544 125879898339008 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:08:30,581 views 6544 125879898339008 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:18:05,470 views 6544 125879889946304 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:22:58,952 views 6544 125879889946304 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:22:58,952 views 6544 125879889946304 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-23 12:23:05,398 views 6544 125879889946304 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-23 12:23:51,788 views 6544 125879500920512 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:23:55,469 views 6544 125879500920512 Email sent successfully to emmy@gmail.com
+INFO 2026-05-23 12:24:13,903 views 6544 125879500920512 Email sent successfully to test@test.com
+INFO 2026-05-23 12:24:13,904 views 6544 125879500920512 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:24:18,063 views 6544 125879500920512 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:25:56,716 views 6544 125879889946304 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:25:56,716 views 6544 125879889946304 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-23 12:26:02,842 views 6544 125879889946304 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-23 12:26:31,880 views 6544 125879509313216 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:26:35,624 views 6544 125879509313216 Email sent successfully to test@test.com
+INFO 2026-05-23 12:26:58,970 views 6544 125879509313216 Email sent successfully to test@test.com
+INFO 2026-05-23 12:26:58,970 views 6544 125879509313216 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+WARNING 2026-05-23 12:27:03,757 views 6544 125879509313216 Invalid OTP attempt for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:27:13,267 views 6544 125879509313216 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:27:39,111 views 6544 125879500920512 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:30:07,798 views 6544 125879509313216 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-23 12:30:07,799 views 6544 125879509313216 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-23 12:30:12,656 views 6544 125879509313216 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-23 12:31:11,890 views 6544 125879889946304 Email sent successfully to test@test.com
+INFO 2026-05-23 12:31:11,891 views 6544 125879889946304 OTP sent successfully to test@test.com for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:31:17,106 views 6544 125879889946304 OTP verified successfully for user ca373892-7437-46c5-92ea-7858cc433f33
+INFO 2026-05-23 12:38:00,213 views 6544 125879889946304 Email sent successfully to Jeanine@gmail.com
+ERROR 2026-05-23 13:31:00,359 views 27139 139024961369792 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:33:08,750 views 27415 128247554635456 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:33:12,002 views 27415 128247554635456 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:33:12,941 views 27415 128247554635456 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:33:13,166 views 27415 128247554635456 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:33:13,345 views 27415 128247554635456 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:33:13,495 views 27415 128247554635456 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:34:25,217 views 27658 133019653371584 Prescription creation error: 'NoneType' object has no attribute 'name'
+ERROR 2026-05-23 13:40:34,307 views 27826 135654309623488 Prescription creation error: 'NoneType' object has no attribute 'name'
+INFO 2026-05-23 13:42:36,512 views 28587 140642307012288 Email sent successfully to Jeanine@gmail.com

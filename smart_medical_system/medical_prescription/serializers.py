@@ -190,15 +190,47 @@ class PrescriptionItemSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = PrescriptionItem
-        fields = ['id', 'drug', 'quantity', 'dosage', 'duration', 'instructions']
+        fields = ['id', 'drug','drug_name', 'quantity', 'dosage', 'duration', 'instructions']
         read_only_fields = ['id']
 
+# serializers.py
+
 class PrescriptionItemCreateSerializer(serializers.ModelSerializer):
-    drug_id = serializers.UUIDField()
+    drug_id = serializers.UUIDField(required=False, allow_null=True)
     
     class Meta:
         model = PrescriptionItem
-        fields = ['drug_id', 'quantity', 'dosage', 'duration', 'instructions']
+        fields = ['drug_id', 'drug_name', 'quantity', 'dosage', 'duration', 'instructions']
+    
+    def validate(self, data):
+        # Either drug_id or drug_name must be provided
+        if not data.get('drug_id') and not data.get('drug_name'):
+            raise serializers.ValidationError("Either drug_id or drug_name is required")
+        return data
+    
+    def create(self, validated_data):
+        drug_id = validated_data.pop('drug_id', None)
+        drug_name = validated_data.pop('drug_name', '')
+        
+        # Handle drug_id if provided
+        if drug_id:
+            try:
+                from .models import Drug
+                drug = Drug.objects.get(id=drug_id)
+                validated_data['drug'] = drug
+                # Auto-populate drug_name from the drug if not provided
+                if not drug_name:
+                    validated_data['drug_name'] = drug.name
+                else:
+                    validated_data['drug_name'] = drug_name
+            except Drug.DoesNotExist:
+                raise serializers.ValidationError({"drug_id": "Drug not found"})
+        else:
+            # Manual entry - only drug_name is provided, drug remains None
+            validated_data['drug'] = None
+            validated_data['drug_name'] = drug_name
+        
+        return super().create(validated_data)
 
 class PrescriptionSerializer(serializers.ModelSerializer):
     patient = PatientSerializer(read_only=True)
@@ -215,10 +247,11 @@ class PrescriptionSerializer(serializers.ModelSerializer):
 class PrescriptionCreateSerializer(serializers.ModelSerializer):
     appointment_id = serializers.UUIDField()
     items = PrescriptionItemCreateSerializer(many=True)
+    status = serializers.ChoiceField(choices=Prescription.STATUS_CHOICES, default='active', required=False)
     
     class Meta:
         model = Prescription
-        fields = ['appointment_id', 'diagnosis', 'notes', 'items']
+        fields = ['appointment_id', 'diagnosis', 'notes', 'items', 'status']
 
     def create(self, validated_data):
         appointment_id = validated_data.pop('appointment_id')
@@ -232,11 +265,37 @@ class PrescriptionCreateSerializer(serializers.ModelSerializer):
         prescription = Prescription.objects.create(**validated_data)
         
         for item_data in items_data:
-            drug_id = item_data.pop('drug_id')
-            drug = Drug.objects.get(id=drug_id)
-            item_data['drug'] = drug
-            item_data['prescription'] = prescription
-            PrescriptionItem.objects.create(**item_data)
+            drug_id = item_data.pop('drug_id', None)
+            drug_name = item_data.pop('drug_name', '')
+            
+            # Handle drug - it can be None for manual entries
+            drug = None
+            final_drug_name = drug_name
+            
+            if drug_id:
+                try:
+                    drug = Drug.objects.get(id=drug_id)
+                    # Use drug name from database if drug_name not provided
+                    if not final_drug_name:
+                        final_drug_name = drug.name
+                except Drug.DoesNotExist:
+                    # If drug not found, treat as manual entry if drug_name exists
+                    if not final_drug_name:
+                        raise serializers.ValidationError(
+                            {"drug_id": f"Drug with id {drug_id} not found and no drug_name provided"}
+                        )
+                    drug = None  # Set to None since drug not found
+            
+            # Create prescription item - drug can be None
+            PrescriptionItem.objects.create(
+                prescription=prescription,
+                drug=drug,  # This can be None
+                drug_name=final_drug_name,
+                quantity=item_data.get('quantity'),
+                dosage=item_data.get('dosage'),
+                duration=item_data.get('duration'),
+                instructions=item_data.get('instructions', '')
+            )
             
         return prescription
 
