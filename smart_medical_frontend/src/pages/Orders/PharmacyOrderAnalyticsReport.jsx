@@ -40,12 +40,14 @@ import {
     CreditCard,
     Pill
 } from 'lucide-react';
-import { orderService } from '../../api';
+import { orderService, getCurrentUser, profileService } from '../../api';
 
 const PharmacyOrderAnalyticsReportPage = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [pharmacyName, setPharmacyName] = useState('Healthcare Pharmacy');
+    const [profileData, setProfileData] = useState(null);
 
     const [filters, setFilters] = useState({
         status: 'all',
@@ -65,16 +67,35 @@ const PharmacyOrderAnalyticsReportPage = () => {
         { value: 'cancelled', label: 'Cancelled' }
     ];
 
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    const userData = getCurrentUser();
     const isAdmin = userData?.user_type === 'pharmacy';
 
     useEffect(() => {
-        if (!isAdmin) {
-            toast.error('Access denied. Administrator privileges required.');
-            navigate('/dashboard');
-            return;
-        }
-        fetchAllOrders();
+        const initializePage = async () => {
+            if (!isAdmin) {
+                toast.error('Access denied. Administrator privileges required.');
+                navigate('/dashboard');
+                return;
+            }
+
+            try {
+                if (userData?.hasProfile) {
+                    const profileResponse = await profileService.getCurrentProfile();
+                    if (profileResponse.success && profileResponse.data) {
+                        setProfileData(profileResponse.data);
+                        if (profileResponse.data.pharmacy_name) {
+                            setPharmacyName(profileResponse.data.pharmacy_name);
+                        }
+                    }
+                }
+                await fetchAllOrders();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                toast.error('Failed to load page data');
+            }
+        };
+        
+        initializePage();
     }, [isAdmin, navigate]);
 
     const fetchAllOrders = async () => {
@@ -96,6 +117,7 @@ const PharmacyOrderAnalyticsReportPage = () => {
             setLoading(false);
         }
     };
+
     const getFilteredOrders = () => {
         return orders.filter(order => {
             if (filters.status !== 'all' && order.status !== filters.status) return false;
@@ -263,7 +285,7 @@ const PharmacyOrderAnalyticsReportPage = () => {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Pharmacy Order Analytics Report - Healthcare System</title>
+                <title>${pharmacyName} - Order Analytics Report</title>
                 <style>
                     body { 
                         font-family: Arial, sans-serif; 
@@ -284,10 +306,22 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         color: #000;
                         padding: 30px;
                         text-align: center;
-                        
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 20px;
+                    }
+                    .logo-container {
+                        flex-shrink: 0;
+                    }
+                   .logo {
+                        width: 150px;
+                        height: 130px;
+                        object-fit: contain;
+                        border-radius: 10px;
                     }
                     .system-info {
-                        margin-bottom: 20px;
+                        text-align: center;
                     }
                     .system-info h1 {
                         margin: 0;
@@ -305,11 +339,12 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         margin: 20px 0 10px 0;
                         text-transform: uppercase;
                         letter-spacing: 1px;
-                        
                         padding-bottom: 5px;
+                        text-align: center;
                     }
                     .report-date {
                         font-size: 12px;
+                        text-align: center;
                     }
                     .content {
                         padding: 20px;
@@ -319,7 +354,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         font-weight: bold;
                         margin: 20px 0 15px 0;
                         padding-bottom: 5px;
-                        
                         text-transform: uppercase;
                     }
                     .stats-grid {
@@ -409,13 +443,18 @@ const PharmacyOrderAnalyticsReportPage = () => {
             <body>
                 <div class="container">
                     <div class="header">
+                        <div class="logo-container">
+                            <img src="/Images/log4.jpeg" alt="Logo" class="logo" onerror="this.style.display='none'" />
+                        </div>
                         <div class="system-info">
-                            <h1>Healthcare Management System</h1>
+                            <h1>${pharmacyName}</h1>
                             <p>Pharmacy Order Analytics & Management Platform</p>
                             <p>Healthcare Prescription Order & Revenue Insights</p>
                         </div>
-                        <div class="report-title">Pharmacy Order Analytics Report</div>
-                        <div class="report-date">Generated on ${new Date().toLocaleDateString('en-US', {
+                    </div>
+                    
+                    <div class="report-title">Pharmacy Order Analytics Report</div>
+                    <div class="report-date">Generated on ${new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
@@ -423,7 +462,6 @@ const PharmacyOrderAnalyticsReportPage = () => {
             hour: '2-digit',
             minute: '2-digit'
         })}</div>
-                    </div>
                     
                     <div class="content">
                         <table class="table">
@@ -455,13 +493,12 @@ const PharmacyOrderAnalyticsReportPage = () => {
                     </div>
                     
                     <div class="footer">
-                       
                         <div class="signature-section">
                             <div class="signature-grid">
                                 <div class="signature-box">
                                     <div class="signature-line"></div>
                                     <div class="signature-label">System Administrator</div>
-                                    <div class="signature-title">Healthcare Management System</div>
+                                    <div class="signature-title">${pharmacyName}</div>
                                     <div style="font-size: 10px; margin-top: 5px;">
                                         Date: ${new Date().toLocaleDateString('en-US')}
                                     </div>
@@ -492,6 +529,7 @@ const PharmacyOrderAnalyticsReportPage = () => {
     const filteredOrders = getFilteredOrders();
     const stats = calculateStats();
     const uniquePharmacies = getUniquePharmacies();
+    
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -502,6 +540,7 @@ const PharmacyOrderAnalyticsReportPage = () => {
             </div>
         );
     }
+    
     if (!isAdmin) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -533,9 +572,9 @@ const PharmacyOrderAnalyticsReportPage = () => {
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-black uppercase">
-                                    Pharmacy Order Analytics Report
+                                    {pharmacyName}
                                 </h1>
-                                <p className="text-black text-sm font-medium">Comprehensive healthcare pharmacy order and revenue analysis</p>
+                                <p className="text-black text-sm font-medium">Pharmacy Order Analytics Report</p>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">
@@ -656,9 +695,10 @@ const PharmacyOrderAnalyticsReportPage = () => {
                         </div>
                     </div>
                 </div>
+                
                 <div className="bg-gray-50 border-2 border-black p-6">
                     <div className="border-b border-black pb-4 mb-6">
-                        <h3 className="text-lg font-bold text-black uppercase">Pharmacy Order Analytics Summary</h3>
+                        <h3 className="text-lg font-bold text-black uppercase">Pharmacy Order Analytics Summary - {pharmacyName}</h3>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -793,6 +833,7 @@ const PharmacyOrderAnalyticsReportPage = () => {
                             </div>
                         </div>
                     </div>
+                    
                     <div className="bg-white border border-black p-4 mb-6">
                         <h4 className="font-bold text-black mb-4 uppercase">Monthly Trend Analysis</h4>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -822,6 +863,7 @@ const PharmacyOrderAnalyticsReportPage = () => {
                             </div>
                         </div>
                     </div>
+                    
                     <div className="bg-white border border-black p-4 mb-6">
                         <h4 className="font-bold text-black mb-4 uppercase">Financial Performance</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

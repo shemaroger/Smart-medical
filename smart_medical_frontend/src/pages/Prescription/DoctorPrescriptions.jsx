@@ -772,9 +772,11 @@ const DoctorPrescriptions = () => {
                                                 <div>
                                                     <p className="text-xs font-medium text-gray-500 uppercase">Drug</p>
                                                     <p className="text-sm font-medium text-gray-900">
-                                                        {item.drug?.name || 'Unknown Drug'}
+                                                        {/* Check if drug object exists, if not use drug_name */}
+                                                        {item.drug ? item.drug.name : (item.drug_name || 'Unknown Drug')}
                                                     </p>
-                                                    {item.drug?.strength && (
+                                                    {/* Only show strength if drug exists */}
+                                                    {item.drug && item.drug.strength && (
                                                         <p className="text-xs text-gray-500">{item.drug.strength}</p>
                                                     )}
                                                 </div>

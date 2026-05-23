@@ -28,28 +28,28 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             if (storedUserData) {
                 const userData = storedUserData;
                 return {
-                    first_name: userData.first_name || 'John',
-                    last_name: userData.last_name || 'Doe',
+                    first_name: userData.first_name || userData.email.split('@')[0],
+                    last_name: userData.last_name || '',
                     email: userData.email || 'john@smartmedical.rw',
-                    role: userData.user_type || 'Patient',
-                    user_type: userData.user_type?.toLowerCase() || 'patient'
+                    role: userData.user_type || '',
+                    user_type: userData.user_type?.toLowerCase() || ''
                 };
             }
             return {
-                first_name: 'Demo',
-                last_name: 'User',
+                first_name: '',
+                last_name: '',
                 email: 'demo@smartmedical.rw',
-                role: 'Patient',
-                user_type: 'patient'
+                role: '',
+                user_type: ''
             };
         } catch (error) {
             console.error('Error getting user data:', error);
             return {
-                first_name: 'Demo',
-                last_name: 'User',
+                first_name: '',
+                last_name: '',
                 email: 'demo@smartmedical.rw',
-                role: 'Patient',
-                user_type: 'patient'
+                role: '',
+                user_type: ''
             };
         }
     };
@@ -149,8 +149,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             name: 'Prescriptions',
             icon: <Pill className="w-5 h-5" />,
             path: '/dashboard/prescriptions',
-            description: 'Prescription Analytics',
-            badge: 'HOT',
+            description: 'Prescription Analytics',         
             color: 'from-purple-500 to-purple-600',
             roles: ['doctor'],
             hasSubItems: true,
@@ -381,23 +380,23 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             {/* Sidebar */}
             <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-gradient-to-b from-blue-900 to-blue-800 border-r border-blue-700 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-xl`}>
                 {/* Logo Section */}
-                <div className="flex items-center justify-center h-40 px-6 border-b border-blue-700 bg-gradient-to-r from-blue-800 to-blue-900">
+                <div className="flex items-center justify-center h-40 px-6 border-b border-green-700 bg-gradient-to-r from-green-900 to-green-900">
                     <div className="flex items-center text-white justify-center">
                         <div className="relative group">
                             <img
-                                src="/public/Images/smartlogo .jpg"
+                                src="/public/Images/log4.jpeg"
                                 alt="Smart Medical Logo"
-                                className="w-28 h-14 rounded-full"
+                                className="w-28 h-20 rounded-full"
                             />
                         </div>
                         <div className="ml-3">
                             <h1 className="text-xl font-bold text-white">Smart Medical</h1>
-                            <p className="text-xs text-blue-200">Prescription Management System</p>
+                            <p className="text-xs text-green-200">Prescription Management System</p>
                         </div>
                     </div>
                     <button
                         onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden absolute top-4 right-4 p-2 text-blue-100 hover:text-white hover:bg-blue-700 rounded-lg transition-all duration-200"
+                        className="lg:hidden absolute top-4 right-4 p-2 text-green-100 hover:text-white hover:bg-green-700 rounded-lg transition-all duration-200"
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -406,7 +405,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 {/* Navigation */}
                 <nav className="mt-6 px-4 space-y-1 h-[78vh] overflow-auto">
                     <div className="mb-6">
-                        <h3 className="text-xs font-semibold text-blue-200 uppercase tracking-wider px-3 mb-3">
+                        <h3 className="text-xs font-semibold text-green-200 uppercase tracking-wider px-3 mb-3">
                             Main Menu ({userdata.role})
                         </h3>
                     </div>
@@ -426,8 +425,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                             transition-all duration-300 ease-out relative overflow-hidden
                                             transform hover:scale-[1.02] hover:shadow-lg
                                             ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem)))
-                                                ? 'bg-white text-blue-900 shadow-md shadow-white/10 border border-gray-200'
-                                                : 'text-blue-100 hover:bg-blue-800/50 hover:text-white hover:shadow-md'
+                                                ? 'bg-white text-green-900 shadow-md shadow-white/10 border border-gray-200'
+                                                : 'text-green-100 hover:bg-green-800/50 hover:text-white hover:shadow-md'
                                             }
                                         `}
                                     >
@@ -441,8 +440,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                             <div className={`
                                                 relative p-2 rounded-lg transition-all duration-300
                                                 ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem)))
-                                                    ? `bg-gradient-to-br ${item.color} text-white shadow-lg shadow-blue-500/25`
-                                                    : 'bg-blue-800/50 text-blue-200 group-hover:bg-blue-700/60 group-hover:shadow-md'
+                                                    ? `bg-gradient-to-br ${item.color} text-white shadow-lg shadow-green-500/25`
+                                                    : 'bg-green-800/50 text-green-200 group-hover:bg-green-700/60 group-hover:shadow-md'
                                                 }
                                             `}>
                                                 {item.icon}
@@ -455,12 +454,12 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                 <div className="flex items-center space-x-2">
                                                     <span className={`
                                                         font-semibold text-sm transition-colors duration-200
-                                                        ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) ? 'text-blue-900' : 'text-blue-100'}
+                                                        ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) ? 'text-green-900' : 'text-green-100'}
                                                     `}>
                                                         {item.name}
                                                     </span>
                                                     {(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) && (
-                                                        <Trophy className="w-3 h-3 text-blue-300 animate-pulse" />
+                                                        <Trophy className="w-3 h-3 text-green-300 animate-pulse" />
                                                     )}
                                                 </div>
                                                 {item.description && (
@@ -588,12 +587,12 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 <header className="bg-white backdrop-blur-md border-b border-gray-100 px-6 py-4 shadow-sm sticky top-0 z-40">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-6">
-                            <button
+                            {/* <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
                                 className="p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200"
                             >
                                 <Menu className="w-5 h-5" />
-                            </button>
+                            </button> */}
 
                             <div className="relative hidden md:flex items-center">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -627,25 +626,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                         </div>
 
                         <div className="flex items-center space-x-3">
-                            <div className="relative">
-                                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                                    <Bell className="w-5 h-5" />
-                                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                                    </span>
-                                </button>
-                            </div>
-                            {userdata.user_type === 'admin' && (
-                                <div className="hidden md:flex items-center space-x-2">
-                                    <button
-                                        className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors"
-                                    >
-                                        Quick Actions
-                                    </button>
-                                    <div className="w-px h-6 bg-gray-200"></div>
-                                </div>
-                            )}
+                         
+                          
                             <div className="relative">
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -706,7 +688,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 </header>
 
                 {/* Main Content */}
-                <main className="py-6 px-6 max-w-7xl mx-auto">
+                <main className="py-6 px-6 max-w-8xl mx-auto">
                     <Outlet />
                 </main>
             </div>

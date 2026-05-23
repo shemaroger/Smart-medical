@@ -653,12 +653,7 @@ const AdminAppointments = () => {
                                             Status: {statusConfig[selectedAppointment.status].label}
                                         </span>
                                     </div>
-                                    <button
-                                        onClick={() => handleStatusUpdate(selectedAppointment)}
-                                        className={`text-${statusConfig[selectedAppointment.status].color}-600 hover:text-${statusConfig[selectedAppointment.status].color}-800 font-medium text-sm`}
-                                    >
-                                        Update Status
-                                    </button>
+                                  
                                 </div>
                             </div>
 
@@ -826,15 +821,7 @@ const AdminAppointments = () => {
                                 </div>
                             )}
 
-                            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                                <button
-                                    onClick={() => handleStatusUpdate(selectedAppointment)}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
-                                >
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    Update Status
-                                </button>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>

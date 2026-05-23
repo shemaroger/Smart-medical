@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     ArrowLeft, Plus, X, Save, Loader2, User, Stethoscope, Calendar,
     Clock, Building2, AlertCircle, Check, Trash2, Search, Pill,
-    FileText, Eye, AlertTriangle
+    FileText, Eye, AlertTriangle, Edit, Database, Type
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { prescriptionService, appointmentService, drugService, getCurrentUser } from '../../api';
@@ -25,7 +25,7 @@ const CreatePrescription = () => {
     const [prescriptionItems, setPrescriptionItems] = useState([
         {
             id: Date.now(),
-            drug: '',
+            drug_id: null,
             drug_name: '',
             quantity: '',
             dosage: '',
@@ -35,9 +35,9 @@ const CreatePrescription = () => {
     ]);
 
     const [drugSearch, setDrugSearch] = useState('');
-    const [availableDrugs, setAvailableDrugs] = useState([]);
     const [drugSearchResults, setDrugSearchResults] = useState([]);
     const [loadingDrugs, setLoadingDrugs] = useState(false);
+    const [activeItemId, setActiveItemId] = useState(null);
 
     const statusChoices = [
         { value: 'active', label: 'Active' },
@@ -47,37 +47,24 @@ const CreatePrescription = () => {
 
     useEffect(() => {
         initializePage();
-        fetchDrugs(); // Load initial drug data
     }, []);
 
-    const fetchDrugs = async () => {
-        try {
-            const response = await drugService.getAll();
-            if (response.success) {
-                const drugData = response.data.results || response.data || [];
-                setAvailableDrugs(drugData);
-            }
-        } catch (error) {
-            console.error('Error fetching drugs:', error);
-        }
-    };
-
-    const searchDrugs = async (searchTerm) => {
+    const searchDrugs = async (searchTerm, itemId) => {
         if (!searchTerm || searchTerm.length < 2) {
             setDrugSearchResults([]);
             return;
         }
 
         setLoadingDrugs(true);
+        setActiveItemId(itemId);
         try {
-            const response = await drugService.getAll({ name: searchTerm });
+            const response = await drugService.getAll({ search: searchTerm });
             if (response.success) {
                 const results = response.data.results || response.data || [];
                 setDrugSearchResults(results);
             }
         } catch (error) {
             console.error('Error searching drugs:', error);
-            toast.error('Failed to search drugs');
         } finally {
             setLoadingDrugs(false);
         }
@@ -92,17 +79,18 @@ const CreatePrescription = () => {
             }
             setUserData(user);
 
-            // Get appointment ID from URL parameters
             const urlParams = new URLSearchParams(window.location.search);
             const appointmentId = urlParams.get('appointment');
 
             if (appointmentId) {
                 await fetchAppointmentDetails(appointmentId);
+            } else {
+                toast.error('No appointment selected');
+                setLoading(false);
             }
         } catch (error) {
             console.error('Error initializing page:', error);
             toast.error('Failed to load page data');
-        } finally {
             setLoading(false);
         }
     };
@@ -115,8 +103,8 @@ const CreatePrescription = () => {
                 setPrescriptionData(prev => ({
                     ...prev,
                     appointment: response.data.id,
-                    patient: response.data.patient.id,
-                    doctor: response.data.doctor.id
+                    patient: response.data.patient?.id,
+                    doctor: response.data.doctor?.id
                 }));
             } else {
                 toast.error('Failed to fetch appointment details');
@@ -124,6 +112,8 @@ const CreatePrescription = () => {
         } catch (error) {
             console.error('Error fetching appointment details:', error);
             toast.error('Failed to fetch appointment details');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -132,7 +122,7 @@ const CreatePrescription = () => {
             ...prev,
             {
                 id: Date.now(),
-                drug: '',
+                drug_id: null,
                 drug_name: '',
                 quantity: '',
                 dosage: '',
@@ -152,39 +142,43 @@ const CreatePrescription = () => {
 
     const handleItemChange = (itemId, field, value) => {
         setPrescriptionItems(prev => prev.map(item =>
-            item.id === itemId
-                ? { ...item, [field]: value }
-                : item
+            item.id === itemId ? { ...item, [field]: value } : item
         ));
     };
 
-    const handleDrugInputChange = (itemId, value) => {
-        handleItemChange(itemId, 'drug_name', value);
+    const handleDrugSearchChange = (itemId, value) => {
+        handleItemChange(itemId, 'drug_id', null);
         setDrugSearch(value);
-
-        // Debounce search to avoid too many API calls
         clearTimeout(window.drugSearchTimeout);
         window.drugSearchTimeout = setTimeout(() => {
-            searchDrugs(value);
+            searchDrugs(value, itemId);
         }, 300);
     };
 
     const handleDrugSelect = (itemId, drug) => {
-        handleItemChange(itemId, 'drug', drug.id);
-        handleItemChange(itemId, 'drug_name', drug.name);
+        handleItemChange(itemId, 'drug_id', drug.id);
+        handleItemChange(itemId, 'drug_name', '');
         setDrugSearchResults([]);
         setDrugSearch('');
+        toast.success(`Selected: ${drug.name}`);
+    };
+
+    const handleManualDrugNameChange = (itemId, value) => {
+        handleItemChange(itemId, 'drug_name', value);
+        handleItemChange(itemId, 'drug_id', null);
     };
 
     const handleSubmit = async () => {
-        // Validation
         if (!prescriptionData.diagnosis.trim()) {
             toast.error('Diagnosis is required');
             return;
         }
 
         const validItems = prescriptionItems.filter(item =>
-            item.drug && item.quantity && item.dosage && item.duration
+            (item.drug_id || (item.drug_name && item.drug_name.trim())) &&
+            item.quantity && 
+            item.dosage && 
+            item.duration
         );
 
         if (validItems.length === 0) {
@@ -195,12 +189,13 @@ const CreatePrescription = () => {
         setSubmitting(true);
         try {
             const prescriptionPayload = {
-                appointment_id: prescriptionData.appointment, // <-- as required
+                appointment_id: prescriptionData.appointment,
                 diagnosis: prescriptionData.diagnosis,
                 notes: prescriptionData.notes || '',
                 status: prescriptionData.status || 'active',
                 items: validItems.map(item => ({
-                    drug_id: item.drug,                 // <-- map to drug_id
+                    drug_id: item.drug_id || null,
+                    drug_name: item.drug_name || '',
                     quantity: parseInt(item.quantity, 10),
                     dosage: item.dosage,
                     duration: item.duration,
@@ -212,7 +207,6 @@ const CreatePrescription = () => {
 
             if (response.success) {
                 toast.success('Prescription created successfully!');
-                // Redirect back to appointments
                 window.history.back();
             } else {
                 toast.error(response.error || 'Failed to create prescription');
@@ -226,6 +220,7 @@ const CreatePrescription = () => {
     };
 
     const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -234,6 +229,7 @@ const CreatePrescription = () => {
     };
 
     const formatTime = (dateString) => {
+        if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleTimeString('en-US', {
             hour: '2-digit',
             minute: '2-digit'
@@ -271,7 +267,7 @@ const CreatePrescription = () => {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <div className="max-w-6xl mx-auto py-8 px-4">
+            <div className="max-w-7xl mx-auto py-8 px-4">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center space-x-4">
@@ -301,7 +297,6 @@ const CreatePrescription = () => {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Patient Info */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium text-gray-700 flex items-center">
                                 <User className="w-4 h-4 mr-2 text-purple-600" />
@@ -318,7 +313,6 @@ const CreatePrescription = () => {
                             </div>
                         </div>
 
-                        {/* Doctor & Hospital Info */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium text-gray-700 flex items-center">
                                 <Stethoscope className="w-4 h-4 mr-2 text-blue-600" />
@@ -336,7 +330,6 @@ const CreatePrescription = () => {
                             </div>
                         </div>
 
-                        {/* Appointment Details */}
                         <div className="space-y-3">
                             <h3 className="text-sm font-medium text-gray-700 flex items-center">
                                 <Calendar className="w-4 h-4 mr-2 text-green-600" />
@@ -358,7 +351,6 @@ const CreatePrescription = () => {
                         </div>
                     </div>
 
-                    {/* Patient Allergies Alert */}
                     {appointment.patient?.allergies && (
                         <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
                             <div className="flex items-start">
@@ -462,22 +454,21 @@ const CreatePrescription = () => {
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                        {/* Drug Selection */}
-                                        <div className="md:col-span-2 lg:col-span-1">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Drug/Medicine *
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                        {/* Search Drug from Catalog */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                                <Database className="w-4 h-4 mr-1 text-blue-600" />
+                                                Search from Catalog
                                             </label>
                                             <div className="relative">
                                                 <input
                                                     type="text"
-                                                    value={item.drug_name}
-                                                    onChange={(e) => handleDrugInputChange(item.id, e.target.value)}
+                                                    onChange={(e) => handleDrugSearchChange(item.id, e.target.value)}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                    placeholder="Search for drug..."
-                                                    required
+                                                    placeholder="Type to search existing drugs..."
                                                 />
-                                                {(drugSearchResults.length > 0 || loadingDrugs) && item.drug_name && (
+                                                {(drugSearchResults.length > 0 || loadingDrugs) && activeItemId === item.id && (
                                                     <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto">
                                                         {loadingDrugs ? (
                                                             <div className="px-3 py-2 text-center text-gray-500">
@@ -495,31 +486,50 @@ const CreatePrescription = () => {
                                                                     <div className="font-medium text-gray-900">
                                                                         {drug.name} {drug.strength && `- ${drug.strength}`}
                                                                     </div>
-                                                                    <div className="text-sm text-gray-500 flex items-center justify-between">
-                                                                        <span>{drug.category?.name || 'No category'}</span>
-                                                                        {drug.requires_prescription && (
-                                                                            <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded">
-                                                                                Prescription Required
-                                                                            </span>
-                                                                        )}
+                                                                    <div className="text-sm text-gray-500">
+                                                                        {drug.category || 'No category'} | {drug.manufacturer || 'Unknown manufacturer'}
                                                                     </div>
-                                                                    {drug.manufacturer && (
-                                                                        <div className="text-xs text-gray-400">
-                                                                            by {drug.manufacturer}
-                                                                        </div>
-                                                                    )}
                                                                 </button>
                                                             ))
-                                                        ) : item.drug_name.length >= 2 && (
+                                                        ) : (
                                                             <div className="px-3 py-2 text-center text-gray-500">
-                                                                No drugs found matching "{item.drug_name}"
+                                                                No drugs found
                                                             </div>
                                                         )}
                                                     </div>
                                                 )}
                                             </div>
+                                            {item.drug_id && (
+                                                <p className="text-xs text-green-600 mt-1 flex items-center">
+                                                    <Check className="w-3 h-3 mr-1" />
+                                                    Selected from catalog
+                                                </p>
+                                            )}
                                         </div>
 
+                                        {/* Manual Drug Entry */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                                                <Type className="w-4 h-4 mr-1 text-green-600" />
+                                                Manual Drug Entry
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={item.drug_name}
+                                                onChange={(e) => handleManualDrugNameChange(item.id, e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                placeholder="Enter drug name manually (not in catalog)"
+                                            />
+                                            {item.drug_name && !item.drug_id && (
+                                                <p className="text-xs text-orange-600 mt-1 flex items-center">
+                                                    <AlertCircle className="w-3 h-3 mr-1" />
+                                                    Manual entry (not in catalog)
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {/* Quantity */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -566,17 +576,17 @@ const CreatePrescription = () => {
                                             />
                                         </div>
 
-                                        {/* Instructions */}
-                                        <div className="md:col-span-2">
+                                        {/* Instructions - Changed to textarea */}
+                                        <div className="lg:col-span-1">
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Special Instructions
                                             </label>
-                                            <input
-                                                type="text"
+                                            <textarea
                                                 value={item.instructions}
                                                 onChange={(e) => handleItemChange(item.id, 'instructions', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="e.g., Take after meals, avoid alcohol"
+                                                rows={3}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
+                                                placeholder="e.g., Take after meals, avoid alcohol, store in cool place..."
                                             />
                                         </div>
                                     </div>

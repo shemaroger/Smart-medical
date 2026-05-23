@@ -420,11 +420,11 @@ const DrugAnalyticsReportPage = () => {
                 <div class="container">
                     <div class="header">
                         <div class="system-info">
-                            <h1>Healthcare Management System</h1>
+                            <h1> Drug Management Analytics Report</h1>
                             <p>Drug Analytics & Pharmaceutical Management Platform</p>
                             <p>Healthcare Drug Inventory & Distribution Insights</p>
                         </div>
-                        <div class="report-title">Drug Management Analytics Report</div>
+                       
                         <div class="report-date">Generated on ${new Date().toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',

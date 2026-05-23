@@ -567,7 +567,7 @@ const PatientOrders = () => {
                                                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
                                                                 <div>
                                                                     <span className="font-medium text-gray-500">Drug:</span>
-                                                                    <p className="text-gray-900">{item.drug?.name || 'N/A'}</p>
+                                                                    <p className="text-gray-900">{item.drug?.name || item.drug_name || 'N/A'}</p>
                                                                 </div>
                                                                 <div>
                                                                     <span className="font-medium text-gray-500">Quantity:</span>

@@ -61,8 +61,6 @@ const PharmacyInventory = () => {
                 toast.error('Please log in to access inventory management');
                 return;
             }
-
-
             await Promise.all([
                 fetchInventory(),
                 fetchDrugs()

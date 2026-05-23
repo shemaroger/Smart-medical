@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Pill, Search, Eye, RefreshCw, Download, X, Loader2,
     Building, Factory, Shield, CheckCircle, Filter,
-    FileText, Package
+    FileText, Package, Plus
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { drugService, getCurrentUser } from '../../api';
@@ -17,7 +17,7 @@ const DrugCatalog = () => {
     const [prescriptionFilter, setPrescriptionFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [drugsPerPage] = useState(12);
-
+    const [userData, setUserData] = useState(null);
 
     const drugCategories = [
         { value: 'antibiotic', label: 'Antibiotic' },
@@ -40,12 +40,14 @@ const DrugCatalog = () => {
     }, []);
 
     const initializePage = async () => {
+        setLoading(true);
         try {
             const user = getCurrentUser();
             if (!user) {
                 toast.error('Please log in to access drug catalog');
                 return;
             }
+            setUserData(user);
             await fetchDrugs();
         } catch (error) {
             console.error('Error initializing page:', error);
@@ -85,6 +87,7 @@ const DrugCatalog = () => {
     };
 
     const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
@@ -108,10 +111,10 @@ const DrugCatalog = () => {
 
     const filteredDrugs = drugs.filter(drug => {
         const matchesSearch =
-            drug.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            drug.generic_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            drug.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            drug.description.toLowerCase().includes(searchTerm.toLowerCase());
+            drug.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            drug.generic_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            drug.manufacturer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            drug.description?.toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesCategory = categoryFilter === 'all' || drug.category === categoryFilter;
 
@@ -144,6 +147,9 @@ const DrugCatalog = () => {
 
     const stats = getStats();
 
+    // Check if user is pharmacy
+    const isPharmacy = userData?.user_type === 'pharmacy';
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -173,6 +179,16 @@ const DrugCatalog = () => {
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Refresh
                     </button>
+                    {/* Only show Bulk Import button for pharmacy users */}
+                    {isPharmacy && (
+                        <a
+                            href='/dashboard/drugs/add-new'
+                            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Bulk Import
+                        </a>
+                    )}
                 </div>
             </div>
 
@@ -365,18 +381,30 @@ const DrugCatalog = () => {
                             >
                                 Previous
                             </button>
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-1 border rounded-md text-sm font-medium ${currentPage === page
-                                        ? 'border-blue-500 bg-blue-50 text-blue-600'
-                                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                                let pageNumber;
+                                if (totalPages <= 5) {
+                                    pageNumber = i + 1;
+                                } else if (currentPage <= 3) {
+                                    pageNumber = i + 1;
+                                } else if (currentPage >= totalPages - 2) {
+                                    pageNumber = totalPages - 4 + i;
+                                } else {
+                                    pageNumber = currentPage - 2 + i;
+                                }
+                                return (
+                                    <button
+                                        key={pageNumber}
+                                        onClick={() => setCurrentPage(pageNumber)}
+                                        className={`px-3 py-1 border rounded-md text-sm font-medium ${currentPage === pageNumber
+                                            ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {pageNumber}
+                                    </button>
+                                );
+                            })}
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}

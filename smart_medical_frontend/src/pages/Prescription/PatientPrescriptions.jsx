@@ -360,10 +360,13 @@ const AppointmentPrescriptions = () => {
                                         <div>
                                             <p className="text-xs font-medium text-gray-500 uppercase">Drug</p>
                                             <p className="text-sm font-medium text-gray-900">
-                                                {item.drug?.name || 'Unknown Drug'}
+                                                {item.drug?.name || item.drug_name || 'Unknown Drug'}
                                             </p>
                                             {item.drug?.strength && (
                                                 <p className="text-xs text-gray-500">{item.drug.strength}</p>
+                                            )}
+                                            {!item.drug && item.drug_name && (
+                                                <p className="text-xs text-orange-500 mt-0.5">⚠️ Manual Entry</p>
                                             )}
                                         </div>
                                         <div>

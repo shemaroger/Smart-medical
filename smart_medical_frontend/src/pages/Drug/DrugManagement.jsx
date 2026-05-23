@@ -450,7 +450,6 @@ const DrugManagement = () => {
                                             </div>
                                             <div className="ml-4">
                                                 <div className="text-sm font-medium text-gray-900">{drug.name}</div>
-                                                <div className="text-xs text-gray-500">ID: {drug.id}</div>
                                             </div>
                                         </div>
                                     </td>

@@ -9,12 +9,14 @@ import {
     CheckCircle, XCircle, Clock, Package, DollarSign, CreditCard, Pill,
     TrendingDown, AlertTriangle
 } from 'lucide-react';
-import { inventoryService } from '../../api';
+import { inventoryService, getCurrentUser, profileService } from '../../api';
 
 const PharmacyInventoryAnalyticsReportPage = () => {
     const navigate = useNavigate();
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [pharmacyName, setPharmacyName] = useState('Healthcare Pharmacy');
+    const [profileData, setProfileData] = useState(null);
 
     // Filter states
     const [filters, setFilters] = useState({
@@ -36,17 +38,47 @@ const PharmacyInventoryAnalyticsReportPage = () => {
         { value: 'over_counter', label: 'Over The Counter' }
     ];
 
-    const userData = JSON.parse(localStorage.getItem('user_data') || '{}');
+    const userData = getCurrentUser();
     const isAdmin = userData?.user_type === 'pharmacy';
 
+    // Convert image to base64 for PDF
+    const getLogoBase64 = () => {
+        // You can either use a direct image URL or convert to base64
+        // For a local image in public folder:
+        return '/Images/log4.jpeg';
+        // Or if you need base64, you would need to load it dynamically
+    };
+
     useEffect(() => {
-        if (!isAdmin) {
-            toast.error('Access denied. Administrator privileges required.');
-            navigate('/dashboard');
-            return;
-        }
-        fetchAllInventory();
+        const initializePage = async () => {
+            if (!isAdmin) {
+                toast.error('Access denied. Administrator privileges required.');
+                navigate('/dashboard');
+                return;
+            }
+
+            try {
+                if (userData?.hasProfile) {
+                    const profileResponse = await profileService.getCurrentProfile();
+                    if (profileResponse.success && profileResponse.data) {
+                        setProfileData(profileResponse.data);
+                        console.log('Profile data:', profileResponse.data);
+                        if (profileResponse.data.pharmacy_name) {
+                            setPharmacyName(profileResponse.data.pharmacy_name || 'Healthcare Headquarters');
+                        }
+                    }
+                }            
+                              
+                await fetchAllInventory();
+            } catch (error) {
+                console.error('Error initializing page:', error);
+                toast.error('Failed to load page data');
+            }
+        };
+        
+        initializePage();
     }, [isAdmin, navigate]);
+    console.log('PharmacyName', pharmacyName);
 
     const fetchAllInventory = async () => {
         setLoading(true);
@@ -230,7 +262,7 @@ const PharmacyInventoryAnalyticsReportPage = () => {
             <!DOCTYPE html>
             <html>
             <head>
-                <title>Pharmacy Inventory Analytics Report - Healthcare System</title>
+                <title>${pharmacyName} - Inventory Analytics Report</title>
                 <style>
                     body {
                         font-family: Arial, sans-serif;
@@ -251,9 +283,22 @@ const PharmacyInventoryAnalyticsReportPage = () => {
                         color: #000;
                         padding: 30px;
                         text-align: center;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 20px;
+                    }
+                    .logo-container {
+                        flex-shrink: 0;
+                    }
+                    .logo {
+                        width: 150px;
+                        height: 130px;
+                        object-fit: contain;
+                        border-radius: 10px;
                     }
                     .system-info {
-                        margin-bottom: 20px;
+                        text-align: center;
                     }
                     .system-info h1 {
                         margin: 0;
@@ -373,11 +418,17 @@ const PharmacyInventoryAnalyticsReportPage = () => {
             <body>
                 <div class="container">
                     <div class="header">
+                        <div class="logo-container">
+                            <img src="/Images/log4.jpeg" alt="Logo" class="logo" onerror="this.style.display='none'" />
+                        </div>
                         <div class="system-info">
-                            <h1>Healthcare Management System</h1>
+                            <h1>${pharmacyName}</h1>
                             <p>Pharmacy Inventory Analytics & Management Platform</p>
                             <p>Healthcare Drug Stock & Financial Performance Insights</p>
                         </div>
+                    </div>
+                    
+                    <div style="text-align: center;">
                         <div class="report-title">Pharmacy Inventory Analytics Report</div>
                         <div class="report-date">Generated on ${new Date().toLocaleDateString('en-US', {
             weekday: 'long',
@@ -511,9 +562,9 @@ const PharmacyInventoryAnalyticsReportPage = () => {
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-black uppercase">
-                                    Pharmacy Inventory Analytics Report
+                                    {pharmacyName}
                                 </h1>
-                                <p className="text-black text-sm font-medium">Comprehensive healthcare inventory stock and financial analysis</p>
+                                <p className="text-black text-sm font-medium">Pharmacy Inventory Analytics Report</p>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">

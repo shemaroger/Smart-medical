@@ -1081,7 +1081,9 @@ const PharmacyOrders = () => {
                                                         <td className="border border-gray-300 px-4 py-3">{index + 1}</td>
                                                         <td className="border border-gray-300 px-4 py-3">
                                                             <div>
-                                                                <div className="font-medium">{item.drug?.name || 'N/A'}</div>
+                                                                <div className="font-medium">
+                                                                    {item.drug?.name || item.drug_name || 'N/A'}
+                                                                </div>
                                                                 {item.drug?.strength && (
                                                                     <div className="text-sm text-gray-500">{item.drug.strength}</div>
                                                                 )}
