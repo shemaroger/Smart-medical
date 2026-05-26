@@ -323,7 +323,7 @@ const HospitalManagement = () => {
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
                     >
-                        <option value="all">All Statuses</option>
+                        <option value="all">Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                     </select>

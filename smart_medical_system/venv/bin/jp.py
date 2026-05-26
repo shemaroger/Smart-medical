@@ -1,4 +1,4 @@
-#!/home/eric-manishimwe/Desktop/Projects/School/smart_medical/smart_medical_system/venv/bin/python3
+#!/Users/macbook/Desktop/Jordan Pharmacy/Smart-medical/smart_medical_system/venv/bin/python3.11
 
 import sys
 import json

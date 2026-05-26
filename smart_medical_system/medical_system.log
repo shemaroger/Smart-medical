@@ -238,3 +238,74 @@ ERROR 2026-05-23 13:33:13,495 views 27415 128247554635456 Prescription creation 
 ERROR 2026-05-23 13:34:25,217 views 27658 133019653371584 Prescription creation error: 'NoneType' object has no attribute 'name'
 ERROR 2026-05-23 13:40:34,307 views 27826 135654309623488 Prescription creation error: 'NoneType' object has no attribute 'name'
 INFO 2026-05-23 13:42:36,512 views 28587 140642307012288 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-26 10:23:07,983 views 15169 123145580662784 Email sent successfully to admin@admin.com
+INFO 2026-05-26 10:23:07,983 views 15169 123145580662784 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:23:23,153 views 15169 123145580662784 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:34:08,213 views 15169 123145681399808 Email sent successfully to admin@admin.com
+INFO 2026-05-26 10:34:08,213 views 15169 123145681399808 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:34:15,185 views 15169 123145681399808 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:35:58,675 views 15169 123145631031296 Email sent successfully to admin@admin.com
+INFO 2026-05-26 10:35:58,676 views 15169 123145631031296 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:36:05,440 views 15169 123145631031296 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:46:48,516 views 15169 123145631031296 Email sent successfully to admin@admin.com
+INFO 2026-05-26 10:46:48,517 views 15169 123145631031296 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:46:53,810 views 15169 123145631031296 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:48:17,380 views 15169 123145580662784 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 10:48:17,380 views 15169 123145580662784 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 10:48:23,739 views 15169 123145580662784 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 10:49:57,199 views 15169 123145664610304 Email sent successfully to admin@admin.com
+INFO 2026-05-26 10:49:57,199 views 15169 123145664610304 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:49:58,480 views 15169 123145664610304 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 10:51:17,335 views 15169 123145614241792 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 10:51:17,336 views 15169 123145614241792 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 10:51:21,748 views 15169 123145614241792 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 11:07:09,328 views 15169 123145647820800 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 11:07:13,384 views 15169 123145580662784 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 11:09:26,238 views 15169 123145647820800 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 11:11:17,602 views 15169 123145631031296 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 12:39:28,161 views 15169 123145631031296 Email sent successfully to admin@admin.com
+INFO 2026-05-26 12:39:28,163 views 15169 123145631031296 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 12:39:39,471 views 15169 123145631031296 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 13:02:34,138 views 15169 123145664610304 Email sent successfully to admin@admin.com
+INFO 2026-05-26 13:05:06,221 views 15169 123145580662784 Email sent successfully to admin@admin.com
+INFO 2026-05-26 13:06:27,897 views 15169 123145580662784 Email sent successfully to admin@admin.com
+INFO 2026-05-26 13:09:41,542 views 15169 123145580662784 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 13:09:41,542 views 15169 123145580662784 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 13:09:51,246 views 15169 123145580662784 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 13:13:09,669 views 15169 123145580662784 Email sent successfully to david@email.com
+INFO 2026-05-26 13:14:04,975 views 15169 123145664610304 Email sent successfully to admin@admin.com
+INFO 2026-05-26 13:14:04,976 views 15169 123145664610304 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 13:14:09,744 views 15169 123145664610304 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 13:14:40,467 views 15169 123145580662784 Email sent successfully to david@email.com
+INFO 2026-05-26 13:14:40,468 views 15169 123145580662784 OTP sent successfully to david@email.com for user a094f027-9400-4aff-8e6a-993ee31b6fc2
+INFO 2026-05-26 13:14:48,447 views 15169 123145580662784 OTP verified successfully for user a094f027-9400-4aff-8e6a-993ee31b6fc2
+INFO 2026-05-26 13:15:21,714 views 15169 123145580662784 Email sent successfully to david@email.com
+INFO 2026-05-26 13:20:14,598 views 15169 123145681399808 Email sent successfully to admin@admin.com
+INFO 2026-05-26 13:20:14,599 views 15169 123145681399808 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 13:20:17,151 views 15169 123145698189312 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 13:22:45,911 views 15169 123145580662784 Email sent successfully to aime@email.com
+INFO 2026-05-26 13:23:32,681 views 15169 123145614241792 Email sent successfully to aime@email.com
+INFO 2026-05-26 13:23:32,682 views 15169 123145614241792 OTP sent successfully to aime@email.com for user f4d8bf42-791a-440b-9c93-7a29fbb58390
+INFO 2026-05-26 13:23:39,926 views 15169 123145614241792 OTP verified successfully for user f4d8bf42-791a-440b-9c93-7a29fbb58390
+INFO 2026-05-26 13:24:15,710 views 15169 123145681399808 Email sent successfully to aime@email.com
+INFO 2026-05-26 13:25:53,198 views 15169 123145681399808 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-26 13:25:53,198 views 15169 123145681399808 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-26 13:25:59,832 views 15169 123145681399808 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-26 13:26:44,106 views 15169 123145631031296 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-26 13:26:48,326 views 15169 123145631031296 Email sent successfully to aime@email.com
+INFO 2026-05-26 13:27:19,387 views 15169 123145631031296 Email sent successfully to aime@email.com
+INFO 2026-05-26 13:27:19,388 views 15169 123145631031296 OTP sent successfully to aime@email.com for user f4d8bf42-791a-440b-9c93-7a29fbb58390
+INFO 2026-05-26 13:27:21,060 views 15169 123145631031296 OTP verified successfully for user f4d8bf42-791a-440b-9c93-7a29fbb58390
+INFO 2026-05-26 13:27:36,487 views 15169 123145597452288 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-26 15:30:59,417 views 24484 123145440829440 Email sent successfully to admin@admin.com
+INFO 2026-05-26 15:30:59,418 views 24484 123145440829440 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 15:31:02,656 views 24484 123145440829440 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 16:18:37,705 views 24484 123145440829440 Email sent successfully to manishimweeric54@gmail.com
+INFO 2026-05-26 16:18:37,705 views 24484 123145440829440 OTP sent successfully to manishimweeric54@gmail.com for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 16:18:47,042 views 24484 123145440829440 OTP verified successfully for user 429d0341-d545-4d8a-aa25-5cd3192f97ff
+INFO 2026-05-26 16:21:00,270 views 24484 123145507987456 Email sent successfully to admin@admin.com
+INFO 2026-05-26 16:21:00,270 views 24484 123145507987456 OTP sent successfully to admin@admin.com for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 16:21:14,259 views 24484 123145507987456 OTP verified successfully for user ad6e78a9-5b6a-4fc3-a018-c73595cf458c
+INFO 2026-05-26 16:22:34,837 views 24484 123145507987456 Email sent successfully to Jeanine@gmail.com
+INFO 2026-05-26 16:22:34,838 views 24484 123145507987456 OTP sent successfully to Jeanine@gmail.com for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795
+INFO 2026-05-26 16:22:40,113 views 24484 123145507987456 OTP verified successfully for user 8f7290c6-5d0a-4781-a1e4-c6e174fa2795

@@ -20,11 +20,9 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // User Data Management
     const getUserData = () => {
         try {
             const storedUserData = getCurrentUser();
-
             if (storedUserData) {
                 const userData = storedUserData;
                 return {
@@ -56,7 +54,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
 
     const userdata = getUserData();
 
-    // Menu Configuration
     const coreMenuItems = [
         {
             name: 'Dashboard Overview',
@@ -133,14 +130,14 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     name: 'Appointment Report',
                     path: '/dashboard/patient/appointment/report',
                     icon: <Users className="w-4 h-4" />,
-                    description: 'Drugs Report',
+                    description: 'Appointment Report',
                     roles: ['patient']
                 },
                 {
                     name: 'Appointment Report',
                     path: '/dashboard/doctor/appointment/report',
                     icon: <Users className="w-4 h-4" />,
-                    description: 'Drugs Report',
+                    description: 'Appointment Report',
                     roles: ['doctor']
                 },
             ]
@@ -149,7 +146,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
             name: 'Prescriptions',
             icon: <Pill className="w-5 h-5" />,
             path: '/dashboard/prescriptions',
-            description: 'Prescription Analytics',         
+            description: 'Prescription Analytics',
             color: 'from-purple-500 to-purple-600',
             roles: ['doctor'],
             hasSubItems: true,
@@ -161,7 +158,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     description: 'View all prescriptions',
                     roles: ['doctor']
                 },
-
             ]
         },
         {
@@ -230,7 +226,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 },
             ]
         },
-
         {
             name: 'User Management',
             icon: <Users className="w-5 h-5" />,
@@ -255,8 +250,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     description: 'User Report',
                     roles: ['admin']
                 },
-
-
             ]
         },
         {
@@ -302,12 +295,17 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     description: 'Search medication database',
                     roles: ['admin']
                 },
-
+                {
+                    name: 'Bulk Import Drugs',
+                    path: '/dashboard/drugs/add-new',
+                    icon: <PlusCircle className="w-4 h-4" />,
+                    description: 'Import drugs from Excel',
+                    roles: ['pharmacy']
+                },
             ]
         }
     ];
 
-    // Filter menu items based on user role
     const getFilteredMenuItems = () => {
         return coreMenuItems.filter(item => {
             if (item.hasSubItems && item.subItems) {
@@ -322,7 +320,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
 
     const menuItems = getFilteredMenuItems();
 
-    // Effects and Handlers
     useEffect(() => {
         const timer = setTimeout(() => {
             setLoading(false);
@@ -368,7 +365,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="flex flex-col items-center space-y-4">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-gray-600">Loading Smart Medical Dashboard...</p>
                 </div>
             </div>
@@ -378,20 +375,21 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Sidebar */}
-            <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-gradient-to-b from-blue-900 to-blue-800 border-r border-blue-700 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-xl`}>
+            <div className={`fixed inset-y-0 left-0 z-50 w-80 bg-gradient-to-b from-green-900 via-green-900 to-emerald-900 border-r border-green-700 transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 shadow-xl`}>
+
                 {/* Logo Section */}
-                <div className="flex items-center justify-center h-40 px-6 border-b border-green-700 bg-gradient-to-r from-green-900 to-green-900">
+                <div className="flex items-center justify-center h-40 px-6 border-b border-green-700 bg-gradient-to-r from-green-900 to-emerald-900">
                     <div className="flex items-center text-white justify-center">
                         <div className="relative group">
                             <img
-                                src="/public/Images/log4.jpeg"
+                                src="/Images/log4.jpeg"
                                 alt="Smart Medical Logo"
-                                className="w-28 h-20 rounded-full"
+                                className="w-28 h-20 rounded-full object-cover border-2 border-green-500 shadow-lg"
                             />
                         </div>
                         <div className="ml-3">
                             <h1 className="text-xl font-bold text-white">Smart Medical</h1>
-                            <p className="text-xs text-green-200">Prescription Management System</p>
+                            <p className="text-xs text-emerald-300">Prescription Management System</p>
                         </div>
                     </div>
                     <button
@@ -405,7 +403,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 {/* Navigation */}
                 <nav className="mt-6 px-4 space-y-1 h-[78vh] overflow-auto">
                     <div className="mb-6">
-                        <h3 className="text-xs font-semibold text-green-200 uppercase tracking-wider px-3 mb-3">
+                        <h3 className="text-xs font-semibold text-emerald-300 uppercase tracking-wider px-3 mb-3">
                             Main Menu ({userdata.role})
                         </h3>
                     </div>
@@ -420,7 +418,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                 >
                                     <button
                                         onClick={() => handleMenuClick(item.path, item.hasSubItems, item.isExternal)}
-                                        className={`    
+                                        className={`
                                             w-full flex items-center justify-between p-3 rounded-xl text-left
                                             transition-all duration-300 ease-out relative overflow-hidden
                                             transform hover:scale-[1.02] hover:shadow-lg
@@ -459,13 +457,13 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                         {item.name}
                                                     </span>
                                                     {(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) && (
-                                                        <Trophy className="w-3 h-3 text-green-300 animate-pulse" />
+                                                        <Trophy className="w-3 h-3 text-emerald-500 animate-pulse" />
                                                     )}
                                                 </div>
                                                 {item.description && (
                                                     <p className={`
                                                         text-xs transition-colors duration-200 mt-0.5
-                                                        ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) ? 'text-gray-600' : 'text-blue-300'}
+                                                        ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) ? 'text-gray-600' : 'text-emerald-300'}
                                                     `}>
                                                         {item.description}
                                                     </p>
@@ -480,10 +478,10 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                     ${item.badge === 'HOT'
                                                         ? 'bg-red-500/80 text-white shadow-sm animate-pulse'
                                                         : item.badge === 'NEW'
-                                                            ? 'bg-green-500/80 text-white shadow-sm'
+                                                            ? 'bg-emerald-500/80 text-white shadow-sm'
                                                             : (activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem)))
-                                                                ? 'bg-blue-400/30 text-white shadow-sm'
-                                                                : 'bg-blue-600/80 text-white group-hover:bg-blue-500'
+                                                                ? 'bg-green-400/30 text-white shadow-sm'
+                                                                : 'bg-green-600/80 text-white group-hover:bg-green-500'
                                                     }
                                                 `}>
                                                     {item.badge}
@@ -491,28 +489,28 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                             )}
                                             {item.hasSubItems ? (
                                                 expandedMenus[item.path] ? (
-                                                    <ChevronUp className="w-4 h-4 text-blue-200 transition-all duration-300" />
+                                                    <ChevronUp className="w-4 h-4 text-emerald-300 transition-all duration-300" />
                                                 ) : (
-                                                    <ChevronDown className="w-4 h-4 text-blue-300 transition-all duration-300" />
+                                                    <ChevronDown className="w-4 h-4 text-emerald-300 transition-all duration-300" />
                                                 )
                                             ) : (
                                                 <ChevronRight className={`
                                                     w-4 h-4 transition-all duration-300
                                                     ${(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem)))
-                                                        ? 'text-blue-200 transform translate-x-1'
-                                                        : 'text-blue-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1'
+                                                        ? 'text-green-400 transform translate-x-1'
+                                                        : 'text-emerald-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1'
                                                     }
                                                 `} />
                                             )}
                                         </div>
 
                                         {(activeMenuItem === item.path || (item.subItems && item.subItems.some(sub => sub.path === activeMenuItem))) && (
-                                            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-white to-blue-200 rounded-r-full shadow-lg shadow-white/50"></div>
+                                            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-white to-emerald-200 rounded-r-full shadow-lg shadow-white/50"></div>
                                         )}
                                     </button>
 
                                     {hoveredItem === `${item.path}-${index}` && activeMenuItem !== item.path && !item.subItems?.some(sub => sub.path === activeMenuItem) && (
-                                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-blue-300 to-blue-200 rounded-r-full transition-all duration-300"></div>
+                                        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-0.5 h-6 bg-gradient-to-b from-emerald-300 to-green-200 rounded-r-full transition-all duration-300"></div>
                                     )}
                                 </div>
 
@@ -526,8 +524,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                     w-full flex items-center justify-between p-3 rounded-lg text-left
                                                     transition-all duration-200 relative border-l-2 mb-2
                                                     ${activeMenuItem === subItem.path
-                                                        ? 'bg-blue-500/20 text-white border-blue-300 shadow-sm'
-                                                        : 'text-blue-200 hover:bg-blue-700/30 hover:text-white border-blue-600 hover:border-blue-400'
+                                                        ? 'bg-emerald-500/20 text-white border-emerald-300 shadow-sm'
+                                                        : 'text-green-200 hover:bg-green-700/30 hover:text-white border-green-700 hover:border-emerald-400'
                                                     }
                                                 `}
                                             >
@@ -535,8 +533,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                     <div className={`
                                                         p-1.5 rounded-md transition-all duration-200
                                                         ${activeMenuItem === subItem.path
-                                                            ? 'bg-blue-400/30 text-white'
-                                                            : 'bg-blue-800/40 text-blue-200 group-hover:bg-blue-700/50'
+                                                            ? 'bg-emerald-400/30 text-white'
+                                                            : 'bg-green-800/40 text-green-200 group-hover:bg-green-700/50'
                                                         }
                                                     `}>
                                                         {subItem.icon}
@@ -545,18 +543,18 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                         <div className="flex items-center space-x-2">
                                                             <span className={`
                                                                 font-medium text-sm transition-colors duration-200
-                                                                ${activeMenuItem === subItem.path ? 'text-white' : 'text-blue-200'}
+                                                                ${activeMenuItem === subItem.path ? 'text-white' : 'text-green-200'}
                                                             `}>
                                                                 {subItem.name}
                                                             </span>
                                                             {activeMenuItem === subItem.path && (
-                                                                <div className="w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse"></div>
+                                                                <div className="w-1.5 h-1.5 bg-emerald-300 rounded-full animate-pulse"></div>
                                                             )}
                                                         </div>
                                                         {subItem.description && (
                                                             <p className={`
                                                                 text-xs transition-colors duration-200 mt-0.5
-                                                                ${activeMenuItem === subItem.path ? 'text-blue-200' : 'text-blue-400'}
+                                                                ${activeMenuItem === subItem.path ? 'text-emerald-200' : 'text-green-400'}
                                                             `}>
                                                                 {subItem.description}
                                                             </p>
@@ -567,8 +565,8 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                 <ChevronRight className={`
                                                     w-3 h-3 transition-all duration-300
                                                     ${activeMenuItem === subItem.path
-                                                        ? 'text-blue-200 transform translate-x-0.5'
-                                                        : 'text-blue-300 opacity-0 group-hover:opacity-100'
+                                                        ? 'text-emerald-200 transform translate-x-0.5'
+                                                        : 'text-green-300 opacity-0 group-hover:opacity-100'
                                                     }
                                                 `} />
                                             </button>
@@ -587,32 +585,24 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                 <header className="bg-white backdrop-blur-md border-b border-gray-100 px-6 py-4 shadow-sm sticky top-0 z-40">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-6">
-                            {/* <button
-                                onClick={() => setSidebarOpen(!sidebarOpen)}
-                                className="p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-200"
-                            >
-                                <Menu className="w-5 h-5" />
-                            </button> */}
-
-                            <div className="relative hidden md:flex items-center">
+                            {/* <div className="relative hidden md:flex items-center">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Search className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
                                     type="text"
-                                    className="w-80 pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm placeholder-gray-500 focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200"
+                                    className="w-80 pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-sm placeholder-gray-500 focus:outline-none focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all duration-200"
                                     placeholder="Search appointments, prescriptions, drugs..."
                                 />
-                            </div>
+                            </div> */}
 
-                            <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-500">
+                            {/* <div className="hidden lg:flex items-center space-x-2 text-sm text-gray-500">
                                 <span>Smart Medical</span>
                                 <span>/</span>
                                 <span className="text-gray-900 font-medium">
                                     {(() => {
                                         const mainItem = menuItems.find(item => item.path === activeMenuItem);
                                         if (mainItem) return mainItem.name;
-
                                         for (const item of menuItems) {
                                             if (item.subItems) {
                                                 const subItem = item.subItems.find(sub => sub.path === activeMenuItem);
@@ -622,18 +612,16 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                         return 'Dashboard';
                                     })()}
                                 </span>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="flex items-center space-x-3">
-                         
-                          
                             <div className="relative">
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
                                     className="flex items-center space-x-3 pl-3 pr-2 py-2 text-sm rounded-xl hover:bg-gray-50 transition-all duration-200 border border-transparent hover:border-gray-200"
                                 >
-                                    <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
+                                    <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-emerald-600 rounded-full flex items-center justify-center ring-2 ring-white shadow-sm">
                                         <span className="text-white text-sm font-medium">
                                             {userdata.first_name?.[0]?.toUpperCase()}{userdata.last_name?.[0]?.toUpperCase()}
                                         </span>
@@ -654,7 +642,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                 {userdata.first_name} {userdata.last_name}
                                             </p>
                                             <p className="text-sm text-gray-500">{userdata.email}</p>
-                                            <p className="text-xs text-blue-600 font-medium">{userdata.role}</p>
+                                            <p className="text-xs text-green-600 font-medium">{userdata.role}</p>
                                         </div>
 
                                         <div className="py-1">
@@ -668,7 +656,6 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                                                 <User className="w-4 h-4 mr-3" />
                                                 Profile Settings
                                             </button>
-
                                         </div>
 
                                         <div className="border-t border-gray-50 py-1">
@@ -687,7 +674,7 @@ const MedicalDashboard = ({ activePage, onPageChange }) => {
                     </div>
                 </header>
 
-                {/* Main Content */}
+                {/* Page Content */}
                 <main className="py-6 px-6 max-w-8xl mx-auto">
                     <Outlet />
                 </main>

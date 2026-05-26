@@ -599,7 +599,7 @@ const UserAnalyticsReportPage = () => {
                                     onChange={(e) => setFilters({ ...filters, status: e.target.value })}
                                     className="w-full px-3 py-2 bg-white border-2 border-black focus:outline-none"
                                 >
-                                    <option value="all">All Statuses</option>
+                                    
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
                                 </select>

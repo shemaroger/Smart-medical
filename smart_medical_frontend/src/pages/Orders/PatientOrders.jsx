@@ -242,7 +242,7 @@ const PatientOrders = () => {
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
                     >
-                        <option value="all">All Statuses</option>
+                        <option value="all">Status</option>
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
                         <option value="completed">Completed</option>

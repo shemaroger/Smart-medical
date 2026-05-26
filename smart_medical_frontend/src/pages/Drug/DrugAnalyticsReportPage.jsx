@@ -550,9 +550,9 @@ const DrugAnalyticsReportPage = () => {
                             </div>
                             <div>
                                 <h1 className="text-2xl font-bold text-black uppercase">
-                                    Drug Management Analytics Report
+                                 Inventory Analytics Dashboard
                                 </h1>
-                                <p className="text-black text-sm font-medium">Comprehensive healthcare drug inventory analysis</p>
+                                <p className="text-black text-sm font-medium">Data-driven insights for smarter pharmacy operations</p>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">

@@ -141,7 +141,7 @@ const LandingPage = () => {
                     <div className="flex justify-between items-center py-4">
                         <div className="flex items-center space-x-2">
                             <img
-                                src="/public/Images/smartlogo .jpg"
+                                src="/public/Images/log4.jpeg"
                                 alt="Smart Medical Logo"
                                 className="w-24 h-10 rounded-full"
                             />

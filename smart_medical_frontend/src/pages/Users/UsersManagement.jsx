@@ -220,7 +220,7 @@ const UsersManagement = () => {
                         value={selectedUserType}
                         onChange={(e) => setSelectedUserType(e.target.value)}
                     >
-                        <option value="all">All User Types</option>
+                        <option value="all">User Type</option>
                         <option value="patient">Patients</option>
                         <option value="doctor">Doctors</option>
                         <option value="pharmacy">Pharmacies</option>
@@ -232,7 +232,7 @@ const UsersManagement = () => {
                         value={selectedStatus}
                         onChange={(e) => setSelectedStatus(e.target.value)}
                     >
-                        <option value="all">All Statuses</option>
+                        <option value="all">Status</option>
                         <option value="active">Active</option>
                         <option value="inactive">Inactive</option>
                         <option value="verified">Verified</option>
