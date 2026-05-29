@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Pill, Search, Plus, Eye, Edit, Trash2, RefreshCw, Download,
     Save, X, Loader2, AlertCircle, Building, Factory, Shield,
-    CheckCircle, XCircle, Filter, FileText, Package
+    CheckCircle, XCircle, Filter, FileText, Package, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { drugService, getCurrentUser } from '../../api';
@@ -14,6 +14,9 @@ const DrugManagement = () => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [drugToDelete, setDrugToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
     const [selectedDrug, setSelectedDrug] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
@@ -70,6 +73,9 @@ const DrugManagement = () => {
         initializePage();
     }, []);
 
+    const canDelete = () =>
+        userData?.user_type === 'admin' || userData?.user_type === 'pharmacy';
+
     const initializePage = async () => {
         try {
             const user = getCurrentUser();
@@ -103,54 +109,40 @@ const DrugManagement = () => {
 
     const resetCreateForm = () => {
         setCreateFormData({
-            name: '',
-            generic_name: '',
-            category: '',
-            description: '',
-            dosage_form: '',
-            manufacturer: '',
-            requires_prescription: true
+            name: '', generic_name: '', category: '', description: '',
+            dosage_form: '', manufacturer: '', requires_prescription: true
         });
         setCreateErrors({});
     };
 
     const resetEditForm = () => {
         setEditFormData({
-            name: '',
-            generic_name: '',
-            category: '',
-            description: '',
-            dosage_form: '',
-            manufacturer: '',
-            requires_prescription: true
+            name: '', generic_name: '', category: '', description: '',
+            dosage_form: '', manufacturer: '', requires_prescription: true
         });
         setEditErrors({});
     };
 
     const validateCreateForm = () => {
         const newErrors = {};
-
         if (!createFormData.name.trim()) newErrors.name = 'Drug name is required';
         if (!createFormData.generic_name.trim()) newErrors.generic_name = 'Generic name is required';
         if (!createFormData.category) newErrors.category = 'Category is required';
         if (!createFormData.description.trim()) newErrors.description = 'Description is required';
         if (!createFormData.dosage_form.trim()) newErrors.dosage_form = 'Dosage form is required';
         if (!createFormData.manufacturer.trim()) newErrors.manufacturer = 'Manufacturer is required';
-
         setCreateErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const validateEditForm = () => {
         const newErrors = {};
-
         if (!editFormData.name.trim()) newErrors.name = 'Drug name is required';
         if (!editFormData.generic_name.trim()) newErrors.generic_name = 'Generic name is required';
         if (!editFormData.category) newErrors.category = 'Category is required';
         if (!editFormData.description.trim()) newErrors.description = 'Description is required';
         if (!editFormData.dosage_form.trim()) newErrors.dosage_form = 'Dosage form is required';
         if (!editFormData.manufacturer.trim()) newErrors.manufacturer = 'Manufacturer is required';
-
         setEditErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -158,7 +150,6 @@ const DrugManagement = () => {
     const handleCreateDrug = async (e) => {
         e.preventDefault();
         if (!validateCreateForm()) return;
-
         setSubmitting(true);
         try {
             const response = await drugService.create(createFormData);
@@ -171,7 +162,6 @@ const DrugManagement = () => {
                 toast.error(response.error || 'Failed to create drug');
             }
         } catch (error) {
-            console.error('Error creating drug:', error);
             toast.error('Failed to create drug');
         } finally {
             setSubmitting(false);
@@ -181,7 +171,6 @@ const DrugManagement = () => {
     const handleUpdateDrug = async (e) => {
         e.preventDefault();
         if (!validateEditForm()) return;
-
         setSubmitting(true);
         try {
             const response = await drugService.update(selectedDrug.id, editFormData);
@@ -194,12 +183,50 @@ const DrugManagement = () => {
                 toast.error(response.error || 'Failed to update drug');
             }
         } catch (error) {
-            console.error('Error updating drug:', error);
             toast.error('Failed to update drug');
         } finally {
             setSubmitting(false);
         }
     };
+
+    // ── Delete handlers ──────────────────────────────────────────────────────
+    const handleDeleteClick = (drug) => {
+        setDrugToDelete(drug);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setDrugToDelete(null);
+        setShowDeleteModal(false);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!drugToDelete) return;
+        setDeleting(true);
+        try {
+            const response = await drugService.delete(drugToDelete.id);
+            // DRF delete returns 204 No Content — treat both success flag and 204 as ok
+            if (response.success || response.status === 204) {
+                toast.success(`"${drugToDelete.name}" deleted successfully`);
+                setDrugs(prev => prev.filter(d => d.id !== drugToDelete.id));
+                setShowDeleteModal(false);
+                setDrugToDelete(null);
+                // Close details modal if the deleted drug was open there
+                if (showDetailsModal && selectedDrug?.id === drugToDelete.id) {
+                    setShowDetailsModal(false);
+                    setSelectedDrug(null);
+                }
+            } else {
+                toast.error(response.error || 'Failed to delete drug');
+            }
+        } catch (error) {
+            console.error('Error deleting drug:', error);
+            toast.error('Failed to delete drug');
+        } finally {
+            setDeleting(false);
+        }
+    };
+    // ─────────────────────────────────────────────────────────────────────────
 
     const handleViewDetails = async (drug) => {
         try {
@@ -211,7 +238,6 @@ const DrugManagement = () => {
                 toast.error('Failed to fetch drug details');
             }
         } catch (error) {
-            console.error('Error fetching drug details:', error);
             toast.error('Failed to fetch drug details');
         }
     };
@@ -232,41 +258,19 @@ const DrugManagement = () => {
 
     const handleCreateInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setCreateFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
-
-        if (createErrors[name]) {
-            setCreateErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setCreateFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        if (createErrors[name]) setCreateErrors(prev => ({ ...prev, [name]: '' }));
     };
 
     const handleEditInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setEditFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
-
-        if (editErrors[name]) {
-            setEditErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
+        setEditFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+        if (editErrors[name]) setEditErrors(prev => ({ ...prev, [name]: '' }));
     };
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    };
+    const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+    });
 
     const getCategoryDisplay = (category) => {
         const categoryObj = drugCategories.find(c => c.value === category);
@@ -288,37 +292,16 @@ const DrugManagement = () => {
             drug.generic_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             drug.manufacturer.toLowerCase().includes(searchTerm.toLowerCase()) ||
             drug.description.toLowerCase().includes(searchTerm.toLowerCase());
-
         const matchesCategory = categoryFilter === 'all' || drug.category === categoryFilter;
-
         let matchesPrescription = true;
-        if (prescriptionFilter === 'prescription') {
-            matchesPrescription = drug.requires_prescription;
-        } else if (prescriptionFilter === 'over_counter') {
-            matchesPrescription = !drug.requires_prescription;
-        }
-
+        if (prescriptionFilter === 'prescription') matchesPrescription = drug.requires_prescription;
+        else if (prescriptionFilter === 'over_counter') matchesPrescription = !drug.requires_prescription;
         return matchesSearch && matchesCategory && matchesPrescription;
     });
 
     const totalPages = Math.ceil(filteredDrugs.length / drugsPerPage);
     const startIndex = (currentPage - 1) * drugsPerPage;
     const paginatedDrugs = filteredDrugs.slice(startIndex, startIndex + drugsPerPage);
-
-    const getStats = () => {
-        const total = drugs.length;
-        const prescription = drugs.filter(d => d.requires_prescription).length;
-        const overCounter = drugs.filter(d => !d.requires_prescription).length;
-        const categories = {};
-
-        drugCategories.forEach(cat => {
-            categories[cat.value] = drugs.filter(d => d.category === cat.value).length;
-        });
-
-        return { total, prescription, overCounter, categories };
-    };
-
-    const stats = getStats();
 
     if (loading) {
         return (
@@ -337,37 +320,29 @@ const DrugManagement = () => {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Drug Management</h1>
-                    <p className="text-sm text-gray-600 mt-1">
-                        Manage pharmaceutical inventory and drug information
-                    </p>
+                    <p className="text-sm text-gray-600 mt-1">Manage pharmaceutical inventory and drug information</p>
                 </div>
                 <div className="flex items-center space-x-3 mt-4 sm:mt-0">
                     <button
                         onClick={fetchDrugs}
                         className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                     >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Refresh
+                        <RefreshCw className="w-4 h-4 mr-2" /> Refresh
                     </button>
                     <button
-                        onClick={() => {
-                            resetCreateForm();
-                            setShowCreateModal(true);
-                        }}
+                        onClick={() => { resetCreateForm(); setShowCreateModal(true); }}
                         className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Drug
+                        <Plus className="w-4 h-4 mr-2" /> Add Drug
                     </button>
-                    <a href='/dashboard/drugs/add-new'
+                    <a
+                        href='/dashboard/drugs/add-new'
                         className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Bulk Import
+                        <Plus className="w-4 h-4 mr-2" /> Bulk Import
                     </a>
                 </div>
             </div>
-
 
             {/* Filters */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -382,18 +357,14 @@ const DrugManagement = () => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-
                     <select
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         value={categoryFilter}
                         onChange={(e) => setCategoryFilter(e.target.value)}
                     >
                         <option value="all">All Categories</option>
-                        {drugCategories.map(category => (
-                            <option key={category.value} value={category.value}>{category.label}</option>
-                        ))}
+                        {drugCategories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                     </select>
-
                     <select
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         value={prescriptionFilter}
@@ -403,41 +374,25 @@ const DrugManagement = () => {
                         <option value="prescription">Prescription Only</option>
                         <option value="over_counter">Over The Counter</option>
                     </select>
-
                     <button className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
-                        <Download className="w-4 h-4 mr-2" />
-                        Export
+                        <Download className="w-4 h-4 mr-2" /> Export
                     </button>
                 </div>
             </div>
 
-            {/* Drugs Table/List */}
+            {/* Table */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Drug Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Generic Name
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Category
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Dosage Form
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Manufacturer
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Type
-                                </th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Actions
-                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Drug Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Generic Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dosage Form</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -456,9 +411,7 @@ const DrugManagement = () => {
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">{drug.generic_name}</div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        {getCategoryBadge(drug.category)}
-                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{getCategoryBadge(drug.category)}</td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="text-sm text-gray-900">{drug.dosage_form}</div>
                                     </td>
@@ -468,13 +421,11 @@ const DrugManagement = () => {
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {drug.requires_prescription ? (
                                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                <Shield className="w-3 h-3 mr-1" />
-                                                Rx
+                                                <Shield className="w-3 h-3 mr-1" /> Rx
                                             </span>
                                         ) : (
                                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                <CheckCircle className="w-3 h-3 mr-1" />
-                                                OTC
+                                                <CheckCircle className="w-3 h-3 mr-1" /> OTC
                                             </span>
                                         )}
                                     </td>
@@ -494,6 +445,16 @@ const DrugManagement = () => {
                                             >
                                                 <Edit className="w-4 h-4" />
                                             </button>
+                                            {/* Delete — admin only */}
+                                            {canDelete() && (
+                                                <button
+                                                    onClick={() => handleDeleteClick(drug)}
+                                                    className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition-colors"
+                                                    title="Delete Drug"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -502,7 +463,6 @@ const DrugManagement = () => {
                     </table>
                 </div>
 
-                {/* Empty State */}
                 {paginatedDrugs.length === 0 && (
                     <div className="text-center py-12">
                         <Pill className="mx-auto h-12 w-12 text-gray-400" />
@@ -535,10 +495,11 @@ const DrugManagement = () => {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`px-3 py-1 border rounded-md text-sm font-medium ${currentPage === page
-                                        ? 'border-blue-500 bg-blue-50 text-blue-600'
-                                        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-                                        }`}
+                                    className={`px-3 py-1 border rounded-md text-sm font-medium ${
+                                        currentPage === page
+                                            ? 'border-blue-500 bg-blue-50 text-blue-600'
+                                            : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                                    }`}
                                 >
                                     {page}
                                 </button>
@@ -555,20 +516,68 @@ const DrugManagement = () => {
                 </div>
             )}
 
-            {/* Create Drug Modal */}
+            {/* ── Delete Confirmation Modal ─────────────────────────────────────── */}
+            {showDeleteModal && drugToDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
+                        <div className="p-6">
+                            <div className="flex items-center space-x-4 mb-4">
+                                <div className="flex-shrink-0 w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold text-gray-900">Delete Drug</h3>
+                                    <p className="text-sm text-gray-500">This action cannot be undone</p>
+                                </div>
+                            </div>
+
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                                <p className="text-sm text-gray-700">
+                                    You are about to permanently delete{' '}
+                                    <span className="font-semibold text-gray-900">"{drugToDelete.name}"</span>
+                                    {' '}({drugToDelete.generic_name}). This will remove the drug from the catalog and may affect existing prescriptions that reference it.
+                                </p>
+                            </div>
+
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    onClick={handleDeleteCancel}
+                                    disabled={deleting}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDeleteConfirm}
+                                    disabled={deleting}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors flex items-center"
+                                >
+                                    {deleting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                            Deleting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete Drug
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ── Create Drug Modal ─────────────────────────────────────────────── */}
             {showCreateModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-semibold text-gray-900">Add New Drug</h3>
-                                <button
-                                    onClick={() => {
-                                        setShowCreateModal(false);
-                                        resetCreateForm();
-                                    }}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                                >
+                                <button onClick={() => { setShowCreateModal(false); resetCreateForm(); }} className="text-gray-400 hover:text-gray-600">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
@@ -577,142 +586,67 @@ const DrugManagement = () => {
                             <form onSubmit={handleCreateDrug} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Drug Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={createFormData.name}
-                                            onChange={handleCreateInputChange}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Drug Name *</label>
+                                        <input type="text" name="name" value={createFormData.name} onChange={handleCreateInputChange}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.name ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter drug name"
-                                        />
+                                            placeholder="Enter drug name" />
                                         {createErrors.name && <p className="text-red-500 text-sm mt-1">{createErrors.name}</p>}
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Generic Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="generic_name"
-                                            value={createFormData.generic_name}
-                                            onChange={handleCreateInputChange}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Generic Name *</label>
+                                        <input type="text" name="generic_name" value={createFormData.generic_name} onChange={handleCreateInputChange}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.generic_name ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter generic name"
-                                        />
+                                            placeholder="Enter generic name" />
                                         {createErrors.generic_name && <p className="text-red-500 text-sm mt-1">{createErrors.generic_name}</p>}
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Category *
-                                        </label>
-                                        <select
-                                            name="category"
-                                            value={createFormData.category}
-                                            onChange={handleCreateInputChange}
-                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.category ? 'border-red-300' : 'border-gray-300'}`}
-                                        >
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                                        <select name="category" value={createFormData.category} onChange={handleCreateInputChange}
+                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.category ? 'border-red-300' : 'border-gray-300'}`}>
                                             <option value="">Select Category</option>
-                                            {drugCategories.map(category => (
-                                                <option key={category.value} value={category.value}>{category.label}</option>
-                                            ))}
+                                            {drugCategories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                                         </select>
                                         {createErrors.category && <p className="text-red-500 text-sm mt-1">{createErrors.category}</p>}
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Dosage Form *
-                                        </label>
-                                        <select
-                                            name="dosage_form"
-                                            value={createFormData.dosage_form}
-                                            onChange={handleCreateInputChange}
-                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.dosage_form ? 'border-red-300' : 'border-gray-300'}`}
-                                        >
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Dosage Form *</label>
+                                        <select name="dosage_form" value={createFormData.dosage_form} onChange={handleCreateInputChange}
+                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.dosage_form ? 'border-red-300' : 'border-gray-300'}`}>
                                             <option value="">Select Dosage Form</option>
-                                            {dosageForms.map(form => (
-                                                <option key={form} value={form}>{form}</option>
-                                            ))}
+                                            {dosageForms.map(f => <option key={f} value={f}>{f}</option>)}
                                         </select>
                                         {createErrors.dosage_form && <p className="text-red-500 text-sm mt-1">{createErrors.dosage_form}</p>}
                                     </div>
-
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Manufacturer *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="manufacturer"
-                                            value={createFormData.manufacturer}
-                                            onChange={handleCreateInputChange}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Manufacturer *</label>
+                                        <input type="text" name="manufacturer" value={createFormData.manufacturer} onChange={handleCreateInputChange}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.manufacturer ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter manufacturer name"
-                                        />
+                                            placeholder="Enter manufacturer name" />
                                         {createErrors.manufacturer && <p className="text-red-500 text-sm mt-1">{createErrors.manufacturer}</p>}
                                     </div>
-
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Description *
-                                        </label>
-                                        <textarea
-                                            name="description"
-                                            value={createFormData.description}
-                                            onChange={handleCreateInputChange}
-                                            rows={3}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                                        <textarea name="description" value={createFormData.description} onChange={handleCreateInputChange} rows={3}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${createErrors.description ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter drug description and usage information"
-                                        />
+                                            placeholder="Enter drug description and usage information" />
                                         {createErrors.description && <p className="text-red-500 text-sm mt-1">{createErrors.description}</p>}
                                     </div>
-
                                     <div className="md:col-span-2">
                                         <label className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                name="requires_prescription"
-                                                checked={createFormData.requires_prescription}
-                                                onChange={handleCreateInputChange}
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
+                                            <input type="checkbox" name="requires_prescription" checked={createFormData.requires_prescription} onChange={handleCreateInputChange}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                             <span className="ml-2 text-sm text-gray-700">Requires Prescription</span>
                                         </label>
                                     </div>
                                 </div>
-
                                 <div className="flex justify-end space-x-3 pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setShowCreateModal(false);
-                                            resetCreateForm();
-                                        }}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                                    >
+                                    <button type="button" onClick={() => { setShowCreateModal(false); resetCreateForm(); }}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                                         Cancel
                                     </button>
-                                    <button
-                                        type="submit"
-                                        disabled={submitting}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
-                                    >
-                                        {submitting ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                Creating...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="w-4 h-4 mr-2" />
-                                                Create Drug
-                                            </>
-                                        )}
+                                    <button type="submit" disabled={submitting}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center">
+                                        {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : <><Save className="w-4 h-4 mr-2" />Create Drug</>}
                                     </button>
                                 </div>
                             </form>
@@ -721,20 +655,14 @@ const DrugManagement = () => {
                 </div>
             )}
 
-            {/* Edit Drug Modal - Same as Create Modal but with Edit Form Data */}
+            {/* ── Edit Drug Modal ───────────────────────────────────────────────── */}
             {showEditModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-semibold text-gray-900">Edit Drug</h3>
-                                <button
-                                    onClick={() => {
-                                        setShowEditModal(false);
-                                        resetEditForm();
-                                    }}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                                >
+                                <button onClick={() => { setShowEditModal(false); resetEditForm(); }} className="text-gray-400 hover:text-gray-600">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
@@ -743,142 +671,67 @@ const DrugManagement = () => {
                             <form onSubmit={handleUpdateDrug} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Drug Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={editFormData.name}
-                                            onChange={handleEditInputChange}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Drug Name *</label>
+                                        <input type="text" name="name" value={editFormData.name} onChange={handleEditInputChange}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.name ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter drug name"
-                                        />
+                                            placeholder="Enter drug name" />
                                         {editErrors.name && <p className="text-red-500 text-sm mt-1">{editErrors.name}</p>}
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Generic Name *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="generic_name"
-                                            value={editFormData.generic_name}
-                                            onChange={handleEditInputChange}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Generic Name *</label>
+                                        <input type="text" name="generic_name" value={editFormData.generic_name} onChange={handleEditInputChange}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.generic_name ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter generic name"
-                                        />
+                                            placeholder="Enter generic name" />
                                         {editErrors.generic_name && <p className="text-red-500 text-sm mt-1">{editErrors.generic_name}</p>}
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Category *
-                                        </label>
-                                        <select
-                                            name="category"
-                                            value={editFormData.category}
-                                            onChange={handleEditInputChange}
-                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.category ? 'border-red-300' : 'border-gray-300'}`}
-                                        >
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+                                        <select name="category" value={editFormData.category} onChange={handleEditInputChange}
+                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.category ? 'border-red-300' : 'border-gray-300'}`}>
                                             <option value="">Select Category</option>
-                                            {drugCategories.map(category => (
-                                                <option key={category.value} value={category.value}>{category.label}</option>
-                                            ))}
+                                            {drugCategories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                                         </select>
                                         {editErrors.category && <p className="text-red-500 text-sm mt-1">{editErrors.category}</p>}
                                     </div>
-
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Dosage Form *
-                                        </label>
-                                        <select
-                                            name="dosage_form"
-                                            value={editFormData.dosage_form}
-                                            onChange={handleEditInputChange}
-                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.dosage_form ? 'border-red-300' : 'border-gray-300'}`}
-                                        >
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Dosage Form *</label>
+                                        <select name="dosage_form" value={editFormData.dosage_form} onChange={handleEditInputChange}
+                                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.dosage_form ? 'border-red-300' : 'border-gray-300'}`}>
                                             <option value="">Select Dosage Form</option>
-                                            {dosageForms.map(form => (
-                                                <option key={form} value={form}>{form}</option>
-                                            ))}
+                                            {dosageForms.map(f => <option key={f} value={f}>{f}</option>)}
                                         </select>
                                         {editErrors.dosage_form && <p className="text-red-500 text-sm mt-1">{editErrors.dosage_form}</p>}
                                     </div>
-
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Manufacturer *
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="manufacturer"
-                                            value={editFormData.manufacturer}
-                                            onChange={handleEditInputChange}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Manufacturer *</label>
+                                        <input type="text" name="manufacturer" value={editFormData.manufacturer} onChange={handleEditInputChange}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.manufacturer ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter manufacturer name"
-                                        />
+                                            placeholder="Enter manufacturer name" />
                                         {editErrors.manufacturer && <p className="text-red-500 text-sm mt-1">{editErrors.manufacturer}</p>}
                                     </div>
-
                                     <div className="md:col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Description *
-                                        </label>
-                                        <textarea
-                                            name="description"
-                                            value={editFormData.description}
-                                            onChange={handleEditInputChange}
-                                            rows={3}
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
+                                        <textarea name="description" value={editFormData.description} onChange={handleEditInputChange} rows={3}
                                             className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${editErrors.description ? 'border-red-300' : 'border-gray-300'}`}
-                                            placeholder="Enter drug description and usage information"
-                                        />
+                                            placeholder="Enter drug description and usage information" />
                                         {editErrors.description && <p className="text-red-500 text-sm mt-1">{editErrors.description}</p>}
                                     </div>
-
                                     <div className="md:col-span-2">
                                         <label className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                name="requires_prescription"
-                                                checked={editFormData.requires_prescription}
-                                                onChange={handleEditInputChange}
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
+                                            <input type="checkbox" name="requires_prescription" checked={editFormData.requires_prescription} onChange={handleEditInputChange}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                             <span className="ml-2 text-sm text-gray-700">Requires Prescription</span>
                                         </label>
                                     </div>
                                 </div>
-
                                 <div className="flex justify-end space-x-3 pt-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setShowEditModal(false);
-                                            resetEditForm();
-                                        }}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-                                    >
+                                    <button type="button" onClick={() => { setShowEditModal(false); resetEditForm(); }}
+                                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
                                         Cancel
                                     </button>
-                                    <button
-                                        type="submit"
-                                        disabled={submitting}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center"
-                                    >
-                                        {submitting ? (
-                                            <>
-                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                                Updating...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Save className="w-4 h-4 mr-2" />
-                                                Update Drug
-                                            </>
-                                        )}
+                                    <button type="submit" disabled={submitting}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center">
+                                        {submitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Updating...</> : <><Save className="w-4 h-4 mr-2" />Update Drug</>}
                                     </button>
                                 </div>
                             </form>
@@ -887,17 +740,14 @@ const DrugManagement = () => {
                 </div>
             )}
 
-            {/* Drug Details Modal */}
+            {/* ── Drug Details Modal ────────────────────────────────────────────── */}
             {showDetailsModal && selectedDrug && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="p-6 border-b border-gray-200">
                             <div className="flex items-center justify-between">
                                 <h3 className="text-lg font-semibold text-gray-900">Drug Details</h3>
-                                <button
-                                    onClick={() => setShowDetailsModal(false)}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                                >
+                                <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-600">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
@@ -912,20 +762,10 @@ const DrugManagement = () => {
                                     <p className="text-sm text-gray-500">{selectedDrug.generic_name}</p>
                                     <div className="flex items-center space-x-2 mt-2">
                                         {getCategoryBadge(selectedDrug.category)}
-                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${selectedDrug.requires_prescription
-                                            ? 'bg-red-100 text-red-800'
-                                            : 'bg-green-100 text-green-800'}`}>
-                                            {selectedDrug.requires_prescription ? (
-                                                <>
-                                                    <Shield className="w-3 h-3 mr-1" />
-                                                    Prescription Required
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <CheckCircle className="w-3 h-3 mr-1" />
-                                                    Over The Counter
-                                                </>
-                                            )}
+                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${selectedDrug.requires_prescription ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+                                            {selectedDrug.requires_prescription
+                                                ? <><Shield className="w-3 h-3 mr-1" /> Prescription Required</>
+                                                : <><CheckCircle className="w-3 h-3 mr-1" /> Over The Counter</>}
                                         </span>
                                     </div>
                                 </div>
@@ -935,29 +775,20 @@ const DrugManagement = () => {
                                 <div className="space-y-4">
                                     <h5 className="font-medium text-gray-900">Drug Information</h5>
                                     <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Brand Name:</span>
-                                            <span className="text-sm text-gray-900">{selectedDrug.name}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Generic Name:</span>
-                                            <span className="text-sm text-gray-900">{selectedDrug.generic_name}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Category:</span>
-                                            <span className="text-sm text-gray-900">{getCategoryDisplay(selectedDrug.category)}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Dosage Form:</span>
-                                            <span className="text-sm text-gray-900">{selectedDrug.dosage_form}</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span className="text-sm font-medium text-gray-600">Created:</span>
-                                            <span className="text-sm text-gray-900">{formatDate(selectedDrug.created_at)}</span>
-                                        </div>
+                                        {[
+                                            ['Brand Name', selectedDrug.name],
+                                            ['Generic Name', selectedDrug.generic_name],
+                                            ['Category', getCategoryDisplay(selectedDrug.category)],
+                                            ['Dosage Form', selectedDrug.dosage_form],
+                                            ['Created', formatDate(selectedDrug.created_at)],
+                                        ].map(([label, value]) => (
+                                            <div key={label} className="flex justify-between">
+                                                <span className="text-sm font-medium text-gray-600">{label}:</span>
+                                                <span className="text-sm text-gray-900">{value}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
-
                                 <div className="space-y-4">
                                     <h5 className="font-medium text-gray-900">Manufacturing Details</h5>
                                     <div className="bg-gray-50 p-4 rounded-lg space-y-3">
@@ -966,16 +797,14 @@ const DrugManagement = () => {
                                             <span className="font-medium text-gray-600">Manufacturer:</span>
                                         </div>
                                         <p className="text-sm text-gray-900 ml-7">{selectedDrug.manufacturer}</p>
-
                                         <div className="flex items-center text-sm pt-2">
                                             <Shield className="w-4 h-4 text-gray-400 mr-3" />
                                             <span className="font-medium text-gray-600">Prescription Status:</span>
                                         </div>
                                         <p className="text-sm text-gray-900 ml-7">
                                             {selectedDrug.requires_prescription
-                                                ? 'Prescription Required - This medication requires a valid prescription from a licensed healthcare provider'
-                                                : 'Over The Counter - This medication can be purchased without a prescription'
-                                            }
+                                                ? 'Prescription Required — valid prescription from a licensed healthcare provider needed'
+                                                : 'Over The Counter — can be purchased without a prescription'}
                                         </p>
                                     </div>
                                 </div>
@@ -997,15 +826,22 @@ const DrugManagement = () => {
                             </div>
 
                             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                                {canDelete() && (
+                                    <button
+                                        onClick={() => {
+                                            setShowDetailsModal(false);
+                                            handleDeleteClick(selectedDrug);
+                                        }}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center"
+                                    >
+                                        <Trash2 className="w-4 h-4 mr-2" /> Delete Drug
+                                    </button>
+                                )}
                                 <button
-                                    onClick={() => {
-                                        setShowDetailsModal(false);
-                                        handleEditDrug(selectedDrug);
-                                    }}
+                                    onClick={() => { setShowDetailsModal(false); handleEditDrug(selectedDrug); }}
                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center"
                                 >
-                                    <Edit className="w-4 h-4 mr-2" />
-                                    Edit Drug
+                                    <Edit className="w-4 h-4 mr-2" /> Edit Drug
                                 </button>
                             </div>
                         </div>

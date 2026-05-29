@@ -21,8 +21,19 @@ from .serializers import *
 import random
 import string
 from django.core.cache import cache
+from rest_framework.permissions import BasePermission
 
 logger = logging.getLogger(__name__)
+
+class CanDeleteDrug(BasePermission):
+    """Allow access only to users with user_type == 'admin'and pharmacy."""
+    def has_permission(self, request, view):
+        return bool(
+            request.user and
+            request.user.is_authenticated and
+            request.user.user_type in ('admin', 'pharmacy')
+        )
+ 
 
 # Email notification helper
 def send_email_notification(recipient_email, subject, message, notification_type='general'):
@@ -566,7 +577,24 @@ class DrugListCreateView(generics.ListCreateAPIView):
 class DrugDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Drug.objects.all()
     serializer_class = DrugSerializer
-    permission_classes = [IsAuthenticated]
+ 
+    def get_permissions(self):
+        """
+        GET / PUT / PATCH  → any authenticated user
+        DELETE             → admin or pharmacy users only
+        """
+        if self.request.method == 'DELETE':
+            return [IsAuthenticated(), CanDeleteDrug()]
+        return [IsAuthenticated()]
+ 
+    def destroy(self, request, *args, **kwargs):
+        drug = self.get_object()
+        drug_name = drug.name
+        self.perform_destroy(drug)
+        return Response(
+            {'message': f'Drug "{drug_name}" deleted successfully'},
+            status=status.HTTP_200_OK
+        )
 
 # Pharmacy Inventory Views
 @api_view(['GET', 'POST'])
@@ -891,122 +919,164 @@ def create_prescription(request):
             {'error': 'Only doctors can create prescriptions'},
             status=status.HTTP_403_FORBIDDEN
         )
-    
+ 
     serializer = PrescriptionCreateSerializer(data=request.data)
     if serializer.is_valid():
         try:
             with transaction.atomic():
                 prescription = serializer.save()
-                
-                # Update appointment status
+ 
+                # Mark appointment as completed
                 appointment = prescription.appointment
                 appointment.status = 'completed'
                 appointment.save()
-                
-                # Generate pharmacy recommendations (COMMENT THIS OUT FOR TESTING)
-                # generate_pharmacy_recommendations(prescription)
-                
-                # Send notification to patient
+ 
+                # Generate pharmacy recommendations
+                try:
+                    generate_pharmacy_recommendations(prescription)
+                except Exception as rec_err:
+                    logger.error(f"Pharmacy recommendation generation failed: {rec_err}")
+                    # Don't block the response — recommendations are best-effort
+ 
+                # Notify patient
                 subject = "Prescription Ready"
-                message = f"Dear {prescription.patient.user.first_name},\n\nYour prescription is ready.\n\nDiagnosis: {prescription.diagnosis}\n\nPrescribed Medications:\n"
-                
-                # DEBUG: Print each item to see what's happening
+                message = (
+                    f"Dear {prescription.patient.user.first_name},\n\n"
+                    f"Your prescription is ready.\n\n"
+                    f"Diagnosis: {prescription.diagnosis}\n\n"
+                    f"Prescribed Medications:\n"
+                )
                 for item in prescription.items.all():
-                    print(f"Item ID: {item.id}")
-                    print(f"Item drug: {item.drug}")
-                    print(f"Item drug_name: {item.drug_name}")
-                    print(f"Item quantity: {item.quantity}")
-                    
-                    # SAFE way to get drug display name
-                    if item.drug is not None:
-                        drug_display = item.drug.name
-                    else:
-                        drug_display = item.drug_name or 'Unknown Drug'
-                    
+                    drug_display = item.drug.name if item.drug else (item.drug_name or 'Unknown Drug')
                     message += f"- {drug_display}: {item.quantity} units, {item.dosage}, for {item.duration}\n"
-                
-                message += f"\nNotes: {prescription.notes}\n\nRecommended pharmacies will be sent separately.\n\nBest regards,\nMedical System Team"
-                
+ 
+                message += f"\nNotes: {prescription.notes}\n\nBest regards,\nMedical System Team"
                 send_email_notification(
                     prescription.patient.user.email, subject, message, 'prescription_ready'
                 )
-                
+ 
                 return Response({
                     'message': 'Prescription created successfully',
                     'prescription': PrescriptionSerializer(prescription).data
                 }, status=status.HTTP_201_CREATED)
-                
+ 
         except Exception as e:
             logger.error(f"Prescription creation error: {str(e)}")
-            print(f"Prescription creation error: {str(e)}")
-            import traceback
-            traceback.print_exc()  # This will show the full error traceback
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            import traceback; traceback.print_exc()
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     else:
-        print("Prescription validation errors:", serializer.errors)
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
 def generate_pharmacy_recommendations(prescription):
-    """Generate pharmacy recommendations based on drug availability"""
+    """
+    Generate pharmacy recommendations based on drug availability.
+ 
+    Matching strategy:
+      - If PrescriptionItem.drug is set  → match via drug FK (exact)
+      - If PrescriptionItem.drug is NULL → match via case-insensitive drug_name
+        against Drug.name in the pharmacy's inventory
+    """
     try:
-        prescribed_drugs = prescription.items.all()
-        pharmacies = Pharmacy.objects.filter(is_verified=True)
-        
+        prescribed_items = list(
+            prescription.items.select_related('drug').all()
+        )
+        total_items = len(prescribed_items)
+ 
+        if total_items == 0:
+            logger.warning(f"Prescription {prescription.id} has no items — skipping recommendations")
+            return
+ 
+        pharmacies = Pharmacy.objects.filter(is_verified=True).prefetch_related(
+            'inventory__drug'
+        )
+ 
         recommendations = []
-        
+ 
         for pharmacy in pharmacies:
-            available_drugs = 0
+            # Build a quick lookup for this pharmacy's inventory
+            # keyed by drug_id (UUID) and drug_name (lowercase)
+            inventory_by_drug_id = {}
+            inventory_by_drug_name = {}
+ 
+            for inv in pharmacy.inventory.all():
+                inventory_by_drug_id[inv.drug_id] = inv
+                inventory_by_drug_name[inv.drug.name.lower()] = inv
+ 
+            available_count = 0
             total_cost = Decimal('0.00')
-            
-            for item in prescribed_drugs:
-                try:
-                    inventory = PharmacyInventory.objects.get(
-                        pharmacy=pharmacy,
-                        drug=item.drug,
-                        quantity_available__gte=item.quantity
-                    )
-                    available_drugs += 1
-                    total_cost += inventory.price_per_unit * item.quantity
-                except PharmacyInventory.DoesNotExist:
-                    continue
-            
-            if available_drugs > 0:
-                availability_score = (available_drugs / len(prescribed_drugs)) * 100
-                
-                recommendation = PharmacyRecommendation.objects.create(
-                    prescription=prescription,
-                    pharmacy=pharmacy,
-                    availability_score=availability_score,
-                    total_cost=total_cost
-                )
-                recommendations.append(recommendation)
-        
-        # Send recommendations to patient if any found
-        if recommendations:
-            # Sort by availability score and cost
-            recommendations.sort(key=lambda x: (-x.availability_score, x.total_cost))
-            
-            subject = "Pharmacy Recommendations"
-            message = f"Dear {prescription.patient.user.first_name},\n\nBased on your prescription, here are our recommended pharmacies:\n\n"
-            
-            for i, rec in enumerate(recommendations[:3], 1):  # Top 3 recommendations
-                message += f"{i}. {rec.pharmacy.pharmacy_name}\n"
-                message += f"   - Availability: {rec.availability_score:.1f}%\n"
-                message += f"   - Total Cost: ${rec.total_cost:.2f}\n"
-                message += f"   - Location: {rec.pharmacy.location}\n"
-                message += f"   - Address: {rec.pharmacy.address}\n\n"
-            
-            message += "Please contact the pharmacy to confirm availability before visiting.\n\nBest regards,\nMedical System Team"
-            
-            send_email_notification(prescription.patient.user.email, subject, message, 'pharmacy_recommendation')
-            
+ 
+            for item in prescribed_items:
+                inv = None
+ 
+                if item.drug_id:
+                    # Catalog drug — match by FK
+                    inv = inventory_by_drug_id.get(item.drug_id)
+                elif item.drug_name:
+                    # Manual entry — fuzzy match by name
+                    inv = inventory_by_drug_name.get(item.drug_name.strip().lower())
+ 
+                if inv and inv.quantity_available >= item.quantity:
+                    available_count += 1
+                    total_cost += inv.price_per_unit * item.quantity
+ 
+            # Only recommend pharmacies that can fill at least one item
+            if available_count == 0:
+                continue
+ 
+            availability_score = Decimal(str(round((available_count / total_items) * 100, 2)))
+ 
+            # update_or_create so re-running doesn't create duplicates
+            rec, created = PharmacyRecommendation.objects.update_or_create(
+                prescription=prescription,
+                pharmacy=pharmacy,
+                defaults={
+                    'availability_score': availability_score,
+                    'total_cost': total_cost,
+                }
+            )
+            recommendations.append(rec)
+ 
+        if not recommendations:
+            logger.info(f"No pharmacies can fill prescription {prescription.id}")
+            return
+ 
+        # Sort: highest availability first, then lowest cost
+        recommendations.sort(key=lambda r: (-r.availability_score, r.total_cost))
+ 
+        # Send top-3 to patient
+        subject = "Pharmacy Recommendations for Your Prescription"
+        message = (
+            f"Dear {prescription.patient.user.first_name},\n\n"
+            f"Based on your prescription, here are our recommended pharmacies:\n\n"
+        )
+        for i, rec in enumerate(recommendations[:3], 1):
+            message += (
+                f"{i}. {rec.pharmacy.pharmacy_name}\n"
+                f"   - Availability: {rec.availability_score:.1f}%\n"
+                f"   - Estimated Cost: {rec.total_cost:.2f} RWF\n"
+                f"   - Location: {rec.pharmacy.location}\n"
+                f"   - Address: {rec.pharmacy.address}\n\n"
+            )
+ 
+        message += (
+            "Please contact the pharmacy to confirm availability before visiting.\n\n"
+            "Best regards,\nMedical System Team"
+        )
+        send_email_notification(
+            prescription.patient.user.email,
+            subject,
+            message,
+            'pharmacy_recommendation'
+        )
+ 
+        logger.info(
+            f"Generated {len(recommendations)} recommendations for prescription {prescription.id}"
+        )
+ 
     except Exception as e:
         logger.error(f"Failed to generate pharmacy recommendations: {str(e)}")
+        raise 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
